@@ -7,9 +7,9 @@ was
 ## 👥 Členové týmu a poměr práce
 | Jméno a příjmení | Role v týmu | Poměr práce |
 |:---|:---|:---:|
-| **Student A** - vedoucí | Datový model & Backend | 1 |
-| **Student B** | WebAPI & SSE | 1 |
-| **Student C** | Blazor klient & UI | 1 |
+| **Student A** - vedoucí | Backend | 1 |
+| **Student B** | WebAPI | 1 |
+| **Student C** | Frontend | 1 |
 
 *Poznámka: Poměr práce `1:1:1` značí rovnoměrný přínos všech členů.
 
