@@ -1,6 +1,7 @@
 # 🍴 Objednávací systém v menze (UTB Minute)
 
 Semestrální projekt do předmětu **Aplikační frameworky**.
+Contributors: Hermedita, ItsMeKubik, Ichtylka
 
 ## 👥 Členové týmu a poměr práce
 | Jméno a příjmení | Role v týmu | Poměr práce |
