@@ -1,5 +1,4 @@
 # Objednávací systém v menze
-S tímto dokumentem souhlasím
 
 Semestrální projekt do předmětu **Aplikační frameworky**.
 
