@@ -2,6 +2,7 @@
 
 Semestrální projekt do předmětu **Aplikační frameworky**.
 Contributors: Hermedita, ItsMeKubik, Ichtylka
+was
 
 ## 👥 Členové týmu a poměr práce
 | Jméno a příjmení | Role v týmu | Poměr práce |
