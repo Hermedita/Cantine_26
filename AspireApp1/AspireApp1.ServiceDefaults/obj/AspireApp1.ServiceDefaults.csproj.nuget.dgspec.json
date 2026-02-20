@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj": {}
+    "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj": {
+    "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj",
+        "projectUniqueName": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj",
         "projectName": "AspireApp1.ServiceDefaults",
-        "projectPath": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj",
+        "projectPath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\AspireApp1.ServiceDefaults\\AspireApp1.ServiceDefaults.csproj",
         "packagesPath": "C:\\Users\\bagri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\AspireApp1.ServiceDefaults\\obj\\",
+        "outputPath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\AspireApp1.ServiceDefaults\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

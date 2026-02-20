@@ -4496,11 +4496,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
+      "projectUniqueName": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
       "projectName": "UTB.Minute.AppHost",
-      "projectPath": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
+      "projectPath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
       "packagesPath": "C:\\Users\\bagri\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost\\obj\\",
+      "outputPath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

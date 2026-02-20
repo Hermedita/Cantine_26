@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fa3ZNy9X4lQ=",
+  "dgSpecHash": "naHBViGWZts=",
   "success": true,
-  "projectFilePath": "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
+  "projectFilePath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost\\UTB.Minute.AppHost.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\bagri\\.nuget\\packages\\aspire.dashboard.sdk.win-x64\\13.1.1\\aspire.dashboard.sdk.win-x64.13.1.1.nupkg.sha512",
     "C:\\Users\\bagri\\.nuget\\packages\\aspire.hosting\\13.1.1\\aspire.hosting.13.1.1.nupkg.sha512",

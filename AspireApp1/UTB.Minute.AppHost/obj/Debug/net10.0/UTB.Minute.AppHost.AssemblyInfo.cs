@@ -17,15 +17,15 @@ using System.Reflection;
     "ext\\"))]
 [assembly: System.Reflection.AssemblyMetadata("dcpbinpath", ("C:\\Users\\bagri\\.nuget\\packages\\aspire.hosting.orchestration.win-x64\\13.1.1\\tools\\" +
     "ext\\bin\\"))]
-[assembly: System.Reflection.AssemblyMetadata("apphostprojectpath", "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost")]
+[assembly: System.Reflection.AssemblyMetadata("apphostprojectpath", "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyMetadata("apphostprojectname", "UTB.Minute.AppHost.csproj")]
 [assembly: System.Reflection.AssemblyMetadata("aspiredashboardpath", ("C:\\Users\\bagri\\.nuget\\packages\\aspire.dashboard.sdk.win-x64\\13.1.1\\tools\\Aspire.D" +
     "ashboard.exe"))]
-[assembly: System.Reflection.AssemblyMetadataAttribute("apphostprojectbaseintermediateoutputpath", "C:\\Users\\bagri\\RiderProjects\\AspireApp1\\UTB.Minute.AppHost\\obj\\")]
+[assembly: System.Reflection.AssemblyMetadataAttribute("apphostprojectbaseintermediateoutputpath", "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AppHost\\obj\\")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11049d6f1049a61a5508c3b3a096b6931500f818")]
 [assembly: System.Reflection.AssemblyProductAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

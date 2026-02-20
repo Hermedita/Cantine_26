@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTB.Minute.DbManager", "UTB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTB.Minute.WebApi", "UTB.Minute.WebApi\UTB.Minute.WebApi.csproj", "{14630B6C-B525-45CE-853C-19B07FA38BB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTB.Minute.AdminClient", "UTB.Minute.AdminClient\UTB.Minute.AdminClient.csproj", "{224D0346-77E9-4F01-9D83-24FE7A6095AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTB.Minute.CanteenClient", "UTB.Minute.CanteenClient\UTB.Minute.CanteenClient.csproj", "{83688B55-C6D3-4202-A6D1-9860B0354050}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{14630B6C-B525-45CE-853C-19B07FA38BB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14630B6C-B525-45CE-853C-19B07FA38BB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14630B6C-B525-45CE-853C-19B07FA38BB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{224D0346-77E9-4F01-9D83-24FE7A6095AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{224D0346-77E9-4F01-9D83-24FE7A6095AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{224D0346-77E9-4F01-9D83-24FE7A6095AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{224D0346-77E9-4F01-9D83-24FE7A6095AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83688B55-C6D3-4202-A6D1-9860B0354050}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83688B55-C6D3-4202-A6D1-9860B0354050}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83688B55-C6D3-4202-A6D1-9860B0354050}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83688B55-C6D3-4202-A6D1-9860B0354050}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

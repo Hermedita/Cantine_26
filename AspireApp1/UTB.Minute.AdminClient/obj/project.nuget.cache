@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "aItTOEaReG4=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\bagri\\Documents\\GitHub\\Cantine_26\\AspireApp1\\UTB.Minute.AdminClient\\UTB.Minute.AdminClient.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\bagri\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.3\\microsoft.aspnetcore.app.internal.assets.10.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
