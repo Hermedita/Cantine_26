@@ -1,7 +1,7 @@
 # 🍴 Objednávací systém v menze (UTB Minute)
 
 Semestrální projekt do předmětu **Aplikační frameworky**.
-Contributors: Hermedita, ItsMeKubik, Ichtylka
+Contributors: Hermedita, ItsMeKubik, Ichtylka, tomas45100
 was
 
 ## 👥 Členové týmu a poměr práce
@@ -10,6 +10,7 @@ was
 | **Student A** - vedoucí | Backend | 1 |
 | **Student B** | WebAPI | 1 |
 | **Student C** | Frontend | 1 |
+| **Student D** | Backend | 1 |
 
 *Poznámka: Poměr práce `1:1:1` značí rovnoměrný přínos všech členů.
 
