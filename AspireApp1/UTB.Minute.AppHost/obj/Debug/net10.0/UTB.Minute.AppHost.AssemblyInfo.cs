@@ -25,7 +25,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11049d6f1049a61a5508c3b3a096b6931500f818")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7db6c17b77002c20475f818aecebaa60a406dc53")]
 [assembly: System.Reflection.AssemblyProductAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UTB.Minute.AppHost")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
