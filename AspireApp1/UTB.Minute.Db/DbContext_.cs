@@ -4,5 +4,5 @@ namespace UTB.Minute.Db;
 
 public class DbContext_(DbContextOptions< DbContext_ >options): DbContext(options)
 {
-    public DbSet<Entity> Entities { get; set; } //tabulky v databazi
+    public DbSet<Meals> Meal { get; set; } //tabulky v databazi
 }
