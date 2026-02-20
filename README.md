@@ -7,7 +7,7 @@ was
 ## 👥 Členové týmu a poměr práce
 | Jméno a příjmení | Role v týmu | Poměr práce |
 |:---|:---|:---:|
-| **Student A** - vedoucí | Backend | 1 |
+| **Student A** - vedoucí | Backend, Database | 1 |
 | **Student B** | WebAPI | 1 |
 | **Student C** | Frontend | 1 |
 | **Student D** | Backend | 1 |
