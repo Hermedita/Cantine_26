@@ -1,49 +1,24 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-//using UTB.Minute.Contracts;
-using UTB.Minute.Db;
-
+using UTB.Minute.Contracts; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.AddServiceDefaults();
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// This line is Aspire magic - it hooks up basic telemetry and health checks
+builder.AddServiceDefaults(); 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.MapDefaultEndpoints(); // More Aspire magic for health checks
+
+// YOUR FIRST ENDPOINT
+app.MapGet("/api/meals", () =>
 {
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    var fakeMeals = new List<MealDto>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+        new MealDto { Id = 1, Name = "Svíčková na smetaně", Price = 95.50m, IsActive = true },
+        new MealDto { Id = 2, Name = "Smažený sýr", Price = 85.00m, IsActive = true }
+    };
+    return TypedResults.Ok(fakeMeals);
+});
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

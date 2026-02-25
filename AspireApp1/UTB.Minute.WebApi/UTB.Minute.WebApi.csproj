@@ -7,12 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\UTB.Minute.Db\UTB.Minute.Db.csproj" />
+      <ProjectReference Include="..\UTB.Minute.Contracts\UTB.Minute.Contracts.csproj" />
+      <ProjectReference Include="..\AspireApp1.ServiceDefaults\AspireApp1.ServiceDefaults.csproj" />
     </ItemGroup>
 
 </Project>

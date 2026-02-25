@@ -12,6 +12,8 @@ builder.AddProject<Projects.UTB_Minute_DbManager>("utb-minute-dbmanager")
     .WithHttpCommand("reset-db", "Reset Database")
     .WaitFor(database);
 
+builder.AddProject<Projects.UTB_Minute_WebApi>("kubikovo-web-api");
+
 //var postgres = builder.AddPostgres("postgres")
 //    .WithPgAdmin()
 //    .WithDataVolume()
