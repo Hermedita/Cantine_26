@@ -27,3 +27,5 @@ app.MapPost("/api/meals", (MealDto newMeal) =>
     return TypedResults.Created($"api/meals/{newMeal.Id}",newMeal);
 });
 app.Run();
+
+public partial class Program { }
