@@ -1,0 +1,16 @@
+# This variable stores your API address so you don't have to type it everywhere
+@HostAddress = https://localhost:7279
+
+### 1. Read all meals (GET)
+GET {{HostAddress}}/api/meals
+Accept: application/json
+
+### 2. Create a new meal (POST)
+POST {{HostAddress}}/api/meals
+Content-Type: application/json
+
+{
+  "name": "Rajče",
+  "price": 135.50,
+  "isActive": true
+}
