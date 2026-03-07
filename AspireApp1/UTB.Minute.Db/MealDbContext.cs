@@ -13,8 +13,7 @@ class Program
 
         using var context = new MealContext(options);
         context.Database.Migrate();
-        // }
-        // public class MealContext : DbContext{}
+
 
         List<Meal> meals =
         [
