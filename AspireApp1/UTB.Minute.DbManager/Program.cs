@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using UTB.Minute.Db;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +7,7 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.AddSqlServerDbContext<DbContext_>("database");
+builder.AddSqlServerDbContext<DbContext>("database");
 
 var app = builder.Build();
 
@@ -20,7 +21,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapPost("/reset-db", async (DbContext_ context) =>
+app.MapPost("/reset-db", async (DbContext context) =>
 {
     await context.Database.EnsureDeletedAsync();
     await context.Database.EnsureCreatedAsync();
