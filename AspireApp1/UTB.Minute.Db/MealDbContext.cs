@@ -1,53 +1,43 @@
 ﻿using Microsoft.EntityFrameworkCore;
-namespace UTB.Minute.Db;
 
-
-class Program
+namespace UTB.Minute.Db
 {
-    static void Main()
-    {
 
-        var options = new DbContextOptionsBuilder<MealContext>()
-            .UseSqlServer("Data Source=meals.db")
-            .Options;
-
-        using var context = new MealContext(options);
-        context.Database.Migrate();
-
-
-        List<Meal> meals =
-        [
-            new Meal()
-            {
-                Id = 1,
-                Name = "Kurizek",
-                Description = "Mnam",
-                Price = 100,
-                IsAvailable = true
-            },
-            new Meal()
-            {
-                Id = 2,
-                Name = "Svickova",
-                Description = "Knedlik je gud",
-                Price = 89,
-                IsAvailable = false
-            }
-        ];
-        context.Meals.AddRange(meals);
-        context.SaveChanges();
-    }
-
-    public class MealContext : DbContext
-    {
-        public MealContext(DbContextOptions<MealContext> options) : base (options)
+    public class MealDbContext : DbContext{
+        
+        public MealDbContext(DbContextOptions<MealDbContext> options) : base (options)
         {
         }
-
-        public DbSet<Meal> Meals { get; set; } //tabulky v databazi
+        
+        public DbSet<Meal> Meals { get; set; }
+        public DbSet<Menu> MenuItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Meal>()
+                .HasKey(me => me.MealId);
+            
+            modelBuilder.Entity<Menu>()
+                .HasKey(mi => mi.MenuId);
+            
+            modelBuilder.Entity<Order>()
+                .HasKey(o => o.OrderId);
+            
+            modelBuilder.Entity<Menu>()
+                .HasOne<Meal>()
+                .WithMany()
+                .HasForeignKey(m => m.MealId);
+            
+            modelBuilder.Entity<Order>()
+                .HasOne<Menu>()
+                .WithMany()
+                .HasForeignKey(o => o.MenuId);
+        }
+        
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Data Source=minute.db");
         }
     }
-
-
-
+}

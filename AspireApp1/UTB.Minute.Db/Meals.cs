@@ -1,50 +1,36 @@
-﻿namespace UTB.Minute.Db;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class Meal
+namespace UTB.Minute.Db
 {
-    public required int Id { get; set; }
-    public required string Name { get; set; } = "";
-    public string Description { get; set; } = "";
-    public required double Price { get; set; }
-    public required bool IsAvailable { get; set; }
+    public class Meal
+    {
+        public int MealId { get; init; }
+        [MaxLength(100)] public string? Name { get; init; }
+        [MaxLength(200)] public string? Description { get; init; }
+        public int? Price { get; init; }
+        [MaxLength(1)] public string IsActive { get; init; } = null!;
+    }
+
+    public class Menu //menuitem
+    {
+        public int MenuId { get; init; }
+        public int MealId { get; init; }
+        public DateTime? MenuDate { get; init; }
+        public required int Portions { get; init; }
+    }
+
+    public class Order
+    {
+        public int OrderId { get; init; }
+        public int MenuId { get; init; }
+        public required OrderStatus Status { get; init; }
+    }
     
-    public ICollection<Menu> MenuItems { get; set; } = new List<Menu>();
-}
-
-public class Menu
-{
-    public required int Id { get; set; }
-    public required DateTime Date { get; set; }
-    public required int MealId { get; set; }
-    public Meal Meal { get; set; } = null!;
-    public required bool IsAvailable { get; set; }
-    public required int Portions { get; set; }
-}
-
-public class Order
-{
-    public required int Id { get; set; }
-    public required DateTime DateOrdered { get; set; }
-    public required OrderStatus Status { get; set; }
-    
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-}
-
-public class OrderItem
-{
-    public required int Id { get; set; }
-    public required int OrderId { get; set; }
-    public Order Order { get; set; } = null!;
-    public required int MealId { get; set; }
-    public Meal Meal { get; set; } = null!;
-    public required int Portions { get; set; }
-    public Menu Menu { get; set; } = null!;
-}
-
-public enum OrderStatus
-{
-    Preparing,      //lower number of items available
-    Ready,          //ready to take
-    Cancelled,      //order does not return number of items
-    Finished
-}
+    public enum OrderStatus
+    {
+        Preparing, //lower number of items available
+        Ready, //ready to take
+        Cancelled, //order does not return number of items
+        Finished
+    }
+};
