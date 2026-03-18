@@ -1,31 +1,118 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-using UTB.Minute.Contracts; 
+using Microsoft.EntityFrameworkCore;
+using UTB.Minute.Contracts;
+using UTB.Minute.Db;
 
 var builder = WebApplication.CreateBuilder(args);
-// This line is Aspire magic - it hooks up basic telemetry and health checks
+
 builder.AddServiceDefaults(); 
+
+builder.AddSqlServerDbContext<MealDbContext>("database");
+
 var app = builder.Build();
-app.MapDefaultEndpoints(); // More Aspire magic for health checks
 
-var fakeMeals = new List<MealDto>
-{        
-    new MealDto { Id = 1, Name = "Svíčková na smetaně", Price = 95.50m, IsActive = true },        
-    new MealDto { Id = 2, Name = "Smažený sýr", Price = 85.00m, IsActive = true }
-};
+app.MapDefaultEndpoints();
 
 
-// YOUR FIRST ENDPOINT
-app.MapGet("/api/meals", () =>
-{ 
-    return TypedResults.Ok(fakeMeals);  
-});
+app.MapGet("/meals", WebAPI.PrintMeals);
+app.MapPost("/meals", WebAPI.CreateNewMeal);
+app.MapPut("/meals/{id}", WebAPI.UpdateMeal);
+app.MapDelete("meals/{id}", WebAPI.DeactivateMeal);
 
-app.MapPost("/api/meals", (MealDto newMeal) =>
-{
-    newMeal.Id = fakeMeals.Max(m => m.Id) + 1;
-    fakeMeals.Add(newMeal);
-    return TypedResults.Created($"api/meals/{newMeal.Id}",newMeal);
-});
+app.MapGet("/menus", () => "Menu");
+app.MapPost("/menus", () => "Menu");
+app.MapPut("/menus", () => "Menu");
+app.MapDelete("/menus/{id}", () => "Menu");
+
+app.MapGet("/orders/active", () => "Orders");
+app.MapGet("/orders/menu", () => "Orders");
+app.MapPost("/orders", () => "Orders");
+app.MapPut("/orders/{id}/status", () => "Orders");
+
 app.Run();
 
-public partial class Program { }
+public static class WebAPI
+{
+    public static async Task<IResult> PrintMeals(MealDbContext db)
+    {
+        var meals = await db.Meals.ToListAsync();
+
+        var mealDTOs = meals.Select(m => new MealDto
+        {
+            Id = m.MealId,
+            Name = m.Name,
+            Price = m.Price,
+            Description = m.Description,
+            IsActive = m.IsActive
+        });
+
+        return TypedResults.Ok(mealDTOs);
+    }
+
+    public static async Task<IResult> CreateNewMeal(MealDto newMealDTO,MealDbContext db)
+    {
+
+        if (newMealDTO.Name == null || newMealDTO.Price == null){
+            return TypedResults.BadRequest("Jídlo musí mít název a cenu!");
+        }
+
+        var newMealEntity = new Meal
+        {
+            Name = newMealDTO.Name,
+            Price = newMealDTO.Price,
+            Description = "Nové jídelko yippee",
+            IsActive = true 
+        };
+
+        db.Meals.Add(newMealEntity);
+
+        await db.SaveChangesAsync();
+
+        newMealDTO.Id = newMealEntity.MealId;
+        newMealDTO.Description = newMealEntity.Description;
+        newMealDTO.IsActive = true;
+
+        return TypedResults.Created($"/meals/{newMealEntity.MealId}",newMealDTO);
+    }
+
+    public static async Task<IResult> UpdateMeal(int id, MealDto updatedMealDTO, MealDbContext db)
+    {
+        if (id != updatedMealDTO.Id)
+        {
+            return TypedResults.BadRequest("ID v URL se neshoduje s ID v těle požadavku");
+        }
+
+        if (updatedMealDTO.Name == null || updatedMealDTO.Price == null)
+        {
+            return TypedResults.BadRequest("Jídlo musí mít název a cenu!");
+        }
+        var existingMeal = await db.Meals.FindAsync(id);
+        if (existingMeal == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        existingMeal.Name = updatedMealDTO.Name;
+        existingMeal.Price = updatedMealDTO.Price;
+        existingMeal.Description = updatedMealDTO.Description;
+        existingMeal.IsActive = updatedMealDTO.IsActive;
+
+        await db.SaveChangesAsync();
+
+        return TypedResults.NoContent();
+    }
+
+    public static async Task<IResult> DeactivateMeal(int id, MealDbContext db)
+    {
+        var existingMeal = await db.Meals.FindAsync(id);
+        if(existingMeal == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        existingMeal.IsActive = false;
+
+        await db.SaveChangesAsync();
+        return TypedResults.NoContent();
+    }
+}

@@ -7,7 +7,7 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.AddSqlServerDbContext<DbContext>("database");
+builder.AddSqlServerDbContext<MealDbContext>("database"); //changed from DbContext to MealDbContext
 
 var app = builder.Build();
 
@@ -21,7 +21,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapPost("/reset-db", async (DbContext context) =>
+app.MapPost("/reset-db", async (MealDbContext context) =>  //changef from DbContext to MealDbContext
 {
     await context.Database.EnsureDeletedAsync();
     await context.Database.EnsureCreatedAsync();
