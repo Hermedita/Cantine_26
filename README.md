@@ -2,17 +2,15 @@
 
 Semestrální projekt do předmětu **Aplikační frameworky**.
 Contributors: Hermedita, ItsMeKubik, Ichtylka, tomas45100
-was
 
 ## 👥 Členové týmu a poměr práce
-| Jméno a příjmení | Role v týmu | Poměr práce |
-|:---|:---|:---:|
-| **Student A** - vedoucí | Backend, Database | 1 |
-| **Student B** | WebAPI | 1 |
-| **Student C** | Frontend | 1 |
-| **Student D** | Backend | 1 |
+| Jméno a příjmení            | Role v týmu           | Poměr práce |
+| :-------------------------- | :-------------------- | :---------: |
+| **Dorien Herman** - vedoucí | Database & DbContext  |      1      |
+| **Jakub Prusenovský**       | WebAPI & WebAPI testy |      1      |
+| **Iva Trochtová**           | Frontend & Klienti    |      1      |
+| **Tomáš Přikryl**           | Zabezpečení           |      1      |
 
-*Poznámka: Poměr práce `1:1:1` značí rovnoměrný přínos všech členů.
 
 ---
 
@@ -35,7 +33,7 @@ Pokud se struktura liší (například CanteenClient je rozdělený na dva proje
 - `UTB.Minute.Db`: Datové entity a `DbContext`.
 - `UTB.Minute.DbManager`: Obsahuje endpoint pro **Http Command** (reset databáze).
 - `UTB.Minute.Contracts`: Sdílená DTO, aby byla zajištěna typová bezpečnost mezi API a klienty.
-- `UTB.Minute.WebAPI`: Hlavní byznys logika, správa objednávek a SSE hub.
+- `UTB.Minute.WebAPI`: Hlavní business logika, správa objednávek a SSE hub.
 - `UTB.Minute.AdminClient`: Aplikace pro vedení menzy (správa jídel a menu).
 - `UTB.Minute.CanteenClient`: Společné rozhraní pro studenty a kuchařky (ošetřeno autorizací).
 
