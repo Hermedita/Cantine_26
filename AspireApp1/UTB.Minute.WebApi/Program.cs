@@ -14,7 +14,7 @@ app.MapDefaultEndpoints();
 app.MapGet("/meals", WebAPI.PrintMeals);
 app.MapPost("/meals", WebAPI.CreateNewMeal);
 app.MapPut("/meals/{id}", WebAPI.UpdateMeal);
-app.MapDelete("/meals/{id}", WebAPI.DeactivateMeal);
+app.MapPatch("/meals/{id}", WebAPI.DeactivateMeal);
 
 app.MapGet("/menus", WebAPI.PrintMenus);
 app.MapPost("/menus", WebAPI.CreateNewMenu);

@@ -1,6 +1,33 @@
-@UTB.Minute.WebApi_HostAddress = http://localhost:5156
+@HostAddress = http://localhost:5156
 
-GET {{UTB.Minute.WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
 
+GET {{HostAddress}}/meals
+###
+
+POST {{HostAddress}}/meals
+Content-Type: application/json
+
+{
+  "name": "Jahoda",
+  "price": 140,
+  "description": "Tady je popis",
+  "isActive": true
+}
+###
+PUT {{HostAddress}}/meals/3
+Content-Type: application/json
+
+{
+    "id": 3,
+    "name": "Smažáček s hranolkami",
+    "description": "Změnil jsem popis jídla",
+    "price": "67"
+}
+###
+
+// Změní active na false
+PATCH  {{HostAddress}}/meals/1
+### 
+
+GET {{HostAddress}}/menus
 ###

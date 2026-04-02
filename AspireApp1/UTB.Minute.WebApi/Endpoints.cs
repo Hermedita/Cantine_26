@@ -32,7 +32,7 @@ public static class WebAPI
         {
             Name = newMealDTO.Name,
             Price = newMealDTO.Price,
-            Description = "Nové jídelko yippee",
+            Description = newMealDTO.Description,
             IsActive = true 
         };
 
