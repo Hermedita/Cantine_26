@@ -1,0 +1,35 @@
+@HostAddress = http://localhost:5156
+
+GET {{HostAddress}}/meals
+###
+
+POST {{HostAddress}}/meals
+Content-Type: application/json
+
+{
+  "name": "Rajská",
+  "price": 99,
+  "description": "S knedlíky!"
+}
+###
+PUT {{HostAddress}}/meals/3
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "Smažáček s hranolkami",
+  "description": "Změnil jsem popis jídla",
+  "price": "67"
+}
+###
+
+// Změní stav jídla, valid -> true/false
+PATCH  {{HostAddress}}/meals/2/state
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+### 
+
+

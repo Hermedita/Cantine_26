@@ -1,0 +1,11 @@
+@HostAddress = http://localhost:5156
+
+GET {{HostAddress}}/orders
+###
+
+POST {{HostAddress}}/orders
+Content-Type: application/json
+
+{
+  "menuId": 2
+}

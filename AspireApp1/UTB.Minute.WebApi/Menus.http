@@ -1,0 +1,28 @@
+@HostAddress = http://localhost:5156
+
+GET {{HostAddress}}/menus
+###
+
+POST {{HostAddress}}/menus
+Content-Type: application/json
+
+{
+  "date": "2026-04-10",
+  "portions": 50,
+  "mealId": 1
+}
+###
+
+PUT {{HostAddress}}/menus/2
+Content-Type: application/json
+
+{
+    "date": "2026-04-05",
+    "portions": 67,
+    "mealId": 1
+}
+
+###
+
+DELETE {{HostAddress}}/menus/1
+###

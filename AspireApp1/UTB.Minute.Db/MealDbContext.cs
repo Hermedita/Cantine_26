@@ -25,12 +25,12 @@ namespace UTB.Minute.Db
                 .HasKey(o => o.OrderId);
             
             modelBuilder.Entity<Menu>()
-                .HasOne<Meal>()
+                .HasOne(m => m.Meal)
                 .WithMany()
                 .HasForeignKey(m => m.MealId);
             
             modelBuilder.Entity<Order>()
-                .HasOne<Menu>()
+                .HasOne(o => o.Menu)
                 .WithMany()
                 .HasForeignKey(o => o.MenuId);
         }

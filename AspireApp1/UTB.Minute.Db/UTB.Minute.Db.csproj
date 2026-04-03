@@ -13,4 +13,8 @@
       <PackageReference Include="SQLite" Version="3.13.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\UTB.Minute.Contracts\UTB.Minute.Contracts.csproj" />
+    </ItemGroup>
+
 </Project>
