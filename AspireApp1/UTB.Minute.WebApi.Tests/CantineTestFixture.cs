@@ -23,11 +23,11 @@ namespace UTB.Minute.WebApi.Tests
 
 
             await app.ResourceNotifications.WaitForResourceHealthyAsync("database", TestContext.Current.CancellationToken);
-            await app.ResourceNotifications.WaitForResourceHealthyAsync("webapi", TestContext.Current.CancellationToken);
+            await app.ResourceNotifications.WaitForResourceHealthyAsync("kubikovo-web-api", TestContext.Current.CancellationToken);
 
             connectionString = await app.GetConnectionStringAsync("database", TestContext.Current.CancellationToken);
             
-            HttpClient = app.CreateHttpClient("webapi", "https");
+            HttpClient = app.CreateHttpClient("kubikovo-web-api", "https");
 
             using var context = CreateContext();
 

@@ -1,9 +1,10 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var sql = builder
-    .AddSqlServer("sql")
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    .AddSqlServer("sql-server");
+    //.WithDataVolume()
+    //.WithEnvironment("MSSQL_SA_PASSWORD", "Str0ngP@ssw0rd!")
+    //.WithLifetime(ContainerLifetime.Persistent);
 
 var database = sql.AddDatabase("database");
 
