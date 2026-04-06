@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using UTB.Minute.Db;
 using Aspire.Hosting.Testing;
 using Xunit;
+using UTB.Minute.Contracts;
 
 namespace UTB.Minute.WebApi.Tests
 {
@@ -36,8 +37,15 @@ namespace UTB.Minute.WebApi.Tests
 
             Meal rizek = new() { Name = "Kuřecí řízek", Price = 135, IsActive = true, Description = "Smažený řízek" };
             Meal smazak = new() { Name = "Smažák", Price = 120, IsActive = true, Description = "Sýr" };
-        
+
+            Menu rizekMenu = new() {Meal = rizek,MenuDate = new DateOnly(2026, 4, 6),Portions = 50};
+            Menu smazakMenu = new() {Meal = smazak,MenuDate = new DateOnly(2026, 4, 7),Portions = 0};
+
+            Order rizekOrder = new Order() {Menu = rizekMenu, Status = OrderStatus.Preparing};
+
             context.Meals.AddRange(rizek, smazak);
+            context.MenuItems.AddRange(rizekMenu, smazakMenu);
+            context.Orders.Add(rizekOrder);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 

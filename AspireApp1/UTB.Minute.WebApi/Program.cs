@@ -22,7 +22,6 @@ app.MapPut("/menus/{id}", WebAPI.UpdateMenu);
 app.MapDelete("/menus/{id}", WebAPI.DeleteMenu);
 
 app.MapGet("/orders", WebAPI.PrintOrders);
-app.MapGet("/orders/menu",() => "Orders");
 app.MapPost("/orders", WebAPI.CreateNewOrder);
 app.MapPut("/orders/{id}/status", WebAPI.UpdateOrderStatus);
 
