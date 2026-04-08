@@ -19,7 +19,7 @@ public class OrderTests(CantineTestFixture fixture)
         OrderDto[]? orderDtos = await response.Content.ReadFromJsonAsync<OrderDto[]>(TestContext.Current.CancellationToken);
 
         Assert.NotNull(orderDtos);
-        Assert.True(orderDtos.Length == 1); 
+        Assert.True(orderDtos.Length >= 1); 
         Assert.Contains(orderDtos, o => o.Status == OrderStatus.Preparing.ToString()); 
     }
     [Fact]

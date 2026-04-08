@@ -12,11 +12,10 @@ Content-Type: application/json
   "description": "S knedlíky!"
 }
 ###
-PUT {{HostAddress}}/meals/3
+PUT {{HostAddress}}/meals/1
 Content-Type: application/json
 
 {
-  "id": 3,
   "name": "Smažáček s hranolkami",
   "description": "Změnil jsem popis jídla",
   "price": "67"
@@ -24,11 +23,11 @@ Content-Type: application/json
 ###
 
 // Změní stav jídla, valid -> true/false
-PATCH  {{HostAddress}}/meals/2/state
+PATCH  {{HostAddress}}/meals/1/state
 Content-Type: application/json
 
 {
-  "isActive": false
+  "isActive": true
 }
 ### 
 
