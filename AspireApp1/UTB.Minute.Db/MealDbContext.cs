@@ -35,9 +35,5 @@ namespace UTB.Minute.Db
                 .HasForeignKey(o => o.MenuId);
         }
         
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlite("Data Source=minute.db");
-        //}
     }
 }

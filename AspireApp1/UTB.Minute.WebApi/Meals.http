@@ -22,7 +22,7 @@ Content-Type: application/json
 }
 ###
 
-// Změní stav jídla, valid -> true/false
+// Changes state of the food, valid -> true/false
 PATCH  {{HostAddress}}/meals/1/state
 Content-Type: application/json
 

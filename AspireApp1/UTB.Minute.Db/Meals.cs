@@ -18,8 +18,6 @@ namespace UTB.Minute.Db
         public int MealId { get; set; }
         public DateOnly? MenuDate { get; set; }
         public required int Portions { get; set; }
-
-        //added
         public Meal? Meal { get; set; }
     }
 
@@ -28,8 +26,6 @@ namespace UTB.Minute.Db
         public int OrderId { get; set; }
         public int MenuId { get; init; }
         public required OrderStatus Status { get; set; }
-
-        //added
         public Menu? Menu { get; set; }
     }
     
