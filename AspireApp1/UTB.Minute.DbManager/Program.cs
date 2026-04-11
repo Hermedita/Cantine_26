@@ -20,14 +20,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapPost("/reset-db", async (MealDbContext context) =>  //changef from DbContext to MealDbContext
+app.MapPost("/reset-db", async (MealDbContext context) =>  //changed from DbContext to MealDbContext
 {
     await context.Database.EnsureDeletedAsync();
     await context.Database.EnsureCreatedAsync();
     await context.SaveChangesAsync();
 });
-
-app.UseHttpsRedirection();
 
 app.UseRouting();
 
