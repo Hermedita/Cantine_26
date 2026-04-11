@@ -49,7 +49,7 @@ public class MenuTests(CantineTestFixture fixture)
         Assert.Equal(HttpStatusCode.BadRequest,response.StatusCode);
     }
     [Fact]
-    public async Task CreateNewMenu_ReturnsBadRequest_WhenMealIsAlreadyScheduledForTheSameDame()
+    public async Task CreateNewMenu_ReturnsBadRequest_WhenMealIsAlreadyScheduledForTheSameDate()
     {
         using var context = fixture.CreateContext();
         var existingMeal = context.Meals.First();
