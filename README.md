@@ -35,7 +35,7 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 - **ASP.NET Core Minimal API** — HTTP endpointy
 - **.NET Aspire** — orchestrace služeb a service discovery
 - **Entity Framework Core** — přístup k databázi
-- **SQLite Server** — relační databáze (běží v kontejneru)
+- **SQL Server** — relační databáze (běží v kontejneru)
 - **Keycloak** — připraveno pro autentizaci (zatím nenasazeno)
 - **xUnit** — unit a integrační testy
 
