@@ -12,5 +12,6 @@ builder.AddProject<Projects.UTB_Minute_DbManager>("utb-minute-dbmanager")
 
 builder.AddProject<Projects.UTB_Minute_WebApi>("web-api").WithReference(database);
 
+builder.AddProject<Projects.UTB_Minute_AdminClient>("admin-client");
 
 builder.Build().Run();
