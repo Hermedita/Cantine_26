@@ -1,0 +1,49 @@
+﻿@page "/student-menu"
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components.Authorization
+@using UTB.Minute.Contracts
+
+<PageTitle>Menu</PageTitle>
+
+<h1>Menu</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (meals is null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th aria-label="Menu for today">PrintMenus (C)</th>
+            <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
+            <th>Summary</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+}
+
+@code {
+    @code {
+    private List<MealDto>? meals;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        meals = new List<MealDto>
+        {
+            new MealDto { Id = 1, Name = "Pizza", Price = 10, Description = "Cheese" },
+            new MealDto { Id = 2, Name = "Pasta", Price = 8, Description = "Tomato" }
+        };
+    }
+}
+ }

@@ -1,0 +1,64 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@using UTB.Minute.Contracts
+@inject CanteenService CanteenService
+
+<PageTitle>Meal Manager</PageTitle>
+
+@if(!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<h3>Meals</h3>
+
+@if(meals is null)
+{
+    <p>Loading ... </p>    
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach(MealDto meal in meals)
+            {
+                <tr>
+                    <th scope="row">@meal.Id</th>
+                    <td>@meal.Name</td>
+                    <td>@meal.Description</td>
+                    <td>@meal.Price</td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}
+<br />
+<a class="btn btn-primary" href="create-meal">Create New Meal</a>
+
+@code {
+    private string? errorMessage;
+    private MealDto[]? meals;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            meals = await CanteenService.GetMealsAsync();
+        }
+        catch(HttpRequestException){
+            errorMessage = "GG";
+        }
+    }
+}

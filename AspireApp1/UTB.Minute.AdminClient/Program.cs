@@ -1,6 +1,17 @@
+using System.Net;
+using UTB.Minute.AdminClient;
 using UTB.Minute.AdminClient.Components;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+/*
+builder.Services.AddHttpClient("api", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5156");
+});*/
+
+builder.Services.AddHttpClient<CanteenService>(client => client.BaseAddress = new Uri("https://web-api"));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -20,9 +31,9 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+    
 
 app.Run();

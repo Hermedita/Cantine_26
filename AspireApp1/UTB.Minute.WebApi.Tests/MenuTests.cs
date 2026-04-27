@@ -8,8 +8,8 @@ using Xunit;
 
 namespace UTB.Minute.WebApi.Tests;
 
-[Collection("Cantine Collection")]
-public class MenuTests(CantineTestFixture fixture)
+[Collection("Canteen Collection")]
+public class MenuTests(CanteenTestFixture fixture)
 {
     [Fact]
     public async Task GetAllMenus_ReturnsOK_WherePortionBiggerThanZero()

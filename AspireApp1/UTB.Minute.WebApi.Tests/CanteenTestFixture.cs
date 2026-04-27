@@ -9,7 +9,7 @@ using UTB.Minute.Contracts;
 namespace UTB.Minute.WebApi.Tests
 {
 
-    public class CantineTestFixture : IAsyncLifetime
+    public class CanteenTestFixture : IAsyncLifetime
     {
         private DistributedApplication app = null!;
         private string? connectionString;
@@ -66,8 +66,8 @@ namespace UTB.Minute.WebApi.Tests
         }
     }
 
-    [CollectionDefinition("Cantine Collection", DisableParallelization = true)]
-    public class CantineCollection : ICollectionFixture<CantineTestFixture>
+    [CollectionDefinition("Canteen Collection", DisableParallelization = true)]
+    public class CanteenCollection : ICollectionFixture<CanteenTestFixture>
     {
     }
 }

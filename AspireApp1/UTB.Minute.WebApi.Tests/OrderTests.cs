@@ -6,8 +6,8 @@ using Xunit;
 
 namespace UTB.Minute.WebApi.Tests;
 
-[Collection("Cantine Collection")]
-public class OrderTests(CantineTestFixture fixture)
+[Collection("Canteen Collection")]
+public class OrderTests(CanteenTestFixture fixture)
 {
     [Fact]
     public async Task PrintOrders_ReturnsOk_AndListOfOrders()

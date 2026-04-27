@@ -7,8 +7,8 @@ using Xunit;
 
 namespace UTB.Minute.WebApi.Tests;
 
-[Collection("Cantine Collection")]
-public class MealsTests(CantineTestFixture fixture)
+[Collection("Canteen Collection")]
+public class MealsTests(CanteenTestFixture fixture)
 {
     [Fact]
     public async Task GetAllMeals_ReturnsOk_AndListOfMeals()
