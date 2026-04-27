@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\UTB.Minute.Contracts\UTB.Minute.Contracts.csproj" />
+      <ProjectReference Include="..\AspireApp1.ServiceDefaults\AspireApp1.ServiceDefaults.csproj" />
     </ItemGroup>
 
 </Project>

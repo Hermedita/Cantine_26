@@ -11,6 +11,8 @@ builder.Services.AddHttpClient("api", client =>
     client.BaseAddress = new Uri("https://localhost:5156");
 });*/
 
+builder.AddServiceDefaults();
+
 builder.Services.AddHttpClient<CanteenService>(client => client.BaseAddress = new Uri("https://web-api"));
 
 // Add services to the container.
