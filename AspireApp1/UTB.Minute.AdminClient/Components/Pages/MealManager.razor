@@ -26,6 +26,7 @@ else
                 <th scope="col">Name</th>
                 <th scope="col">Description</th>
                 <th scope="col">Price</th>
+                <th scope="col">Is Active</th>
             </tr>
         </thead>
         <tbody>
@@ -37,6 +38,15 @@ else
                     <td>@meal.Name</td>
                     <td>@meal.Description</td>
                     <td>@meal.Price</td>
+                    <td>@meal.IsActive</td>
+                        <td>
+                            <button type="button"
+                                    class="btn @(meal.IsActive ? "btn-warning" : "btn-success")"
+                                    @onclick="() => ToggleMealActiveAsync(meal)">
+                                @(meal.IsActive ? "Deactivate" : "Activate")
+                            </button>
+                        </td>
+                    <button type="edit" class="btn btn-primary">Edit Meal</button>
                 </tr>
             }
 
@@ -59,6 +69,31 @@ else
         }
         catch(HttpRequestException){
             errorMessage = "GG";
+        }
+    }
+
+    protected async Task ToggleMealActiveAsync(MealDto meal)
+    {
+        try
+        {
+            if (meal.IsActive)
+            {
+                MealStateRequestDto state = new(){
+                  IsActive = false
+                };
+                await CanteenService.ChangeMealStateAsync(state,meal.Id);
+            }
+            else
+            {
+                MealStateRequestDto state = new(){
+                  IsActive = true  
+                };
+                await CanteenService.ChangeMealStateAsync(state,meal.Id);
+            }
+            meal.IsActive = !meal.IsActive;
+        }
+        catch (HttpRequestException e){
+            errorMessage = e.ToString();
         }
     }
 }

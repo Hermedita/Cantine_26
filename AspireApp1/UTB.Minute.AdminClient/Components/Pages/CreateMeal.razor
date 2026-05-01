@@ -1,0 +1,46 @@
+@page "/create-meal"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using UTB.Minute.Contracts
+@inject NavigationManager Navigation
+@inject CanteenService CanteenService
+
+<EditForm Model="meal" OnValidSubmit="CreateMealSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Name</label>
+        <InputText class="form-control" @bind-Value="meal.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <InputTextArea class="form-control" @bind-Value="meal.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label>Price</label>
+        <InputNumber class="form-control" @bind-Value="meal.Price" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Meal</button>
+    <a class="btn btn-secondary" href="/">Cancel</a>
+</EditForm>
+
+@code {
+    private MealRequestDto meal = new()
+    {
+        Name = string.Empty,
+        Description = string.Empty,
+        Price = 0,
+    };
+
+    private async Task CreateMealSubmit()
+    {
+        await CanteenService.CreateMealAsync(meal);
+        Navigation.NavigateTo("/");
+    }
+
+}

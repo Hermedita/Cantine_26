@@ -9,5 +9,18 @@ namespace UTB.Minute.AdminClient
             MealDto[]? meals = await httpClient.GetFromJsonAsync<MealDto[]>("/meals");
             return meals;
         } 
+
+        public async Task CreateMealAsync(MealRequestDto meal)
+        {
+            var response = await httpClient.PostAsJsonAsync("/meals", meal);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task ChangeMealStateAsync(MealStateRequestDto mealStateRequest, int id)
+        {
+            var response = await httpClient.PatchAsJsonAsync($"/meal/{id}/state", mealStateRequest);
+            response.EnsureSuccessStatusCode();
+        }
     }
+    
 }
