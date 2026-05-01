@@ -18,7 +18,7 @@ namespace UTB.Minute.AdminClient
 
         public async Task ChangeMealStateAsync(MealStateRequestDto mealStateRequest, int id)
         {
-            var response = await httpClient.PatchAsJsonAsync($"/meal/{id}/state", mealStateRequest);
+            var response = await httpClient.PatchAsJsonAsync($"/meals/{id}/state", mealStateRequest);
             response.EnsureSuccessStatusCode();
         }
     }
