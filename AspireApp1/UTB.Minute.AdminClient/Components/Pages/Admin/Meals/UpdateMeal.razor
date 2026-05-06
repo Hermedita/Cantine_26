@@ -1,0 +1,96 @@
+@page "/meals/update/{MealId:int}"
+@rendermode InteractiveServer
+@using UTB.Minute.Contracts
+@inject NavigationManager Navigation
+@inject CanteenService CanteenService
+
+<h3>Update Meal</h3>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="meal" OnValidSubmit="UpdateMealSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="meal.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <InputTextArea class="form-control" @bind-Value="meal.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label>Price</label>
+            <InputNumber class="form-control" @bind-Value="meal.Price" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirm</button>
+        <a class="btn btn-secondary" href="/">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int MealId { get; set; }
+
+    private string? errorMessage;
+    private bool isLoading = true;
+
+    private MealRequestDto meal = new()
+    {
+        Name = string.Empty,
+        Description = string.Empty,
+        Price = 0
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            MealDto? existingMeal = await CanteenService.GetMealAsync(MealId);
+
+            if (existingMeal is null)
+            {
+                errorMessage = "Meal was not found.";
+                return;
+            }
+
+            meal.Name = existingMeal.Name;
+            meal.Description = existingMeal.Description;
+            meal.Price = existingMeal.Price;
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateMealSubmit()
+    {
+        try
+        {
+            await CanteenService.UpdateMealAsync(meal, MealId);
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = e.Message;
+        }
+    }
+}

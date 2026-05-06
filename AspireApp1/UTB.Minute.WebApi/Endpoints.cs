@@ -63,7 +63,26 @@ public static class WebAPI
 
         return TypedResults.NoContent();
     }
+    public static async Task<IResult> GetMeal(int id, MealDbContext db)
+    {
+        var meal = await db.Meals.FindAsync(id);
 
+        if (meal == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var mealDto = new MealDto
+        {
+            Id = meal.MealId,
+            Name = meal.Name ?? string.Empty,
+            Price = meal.Price ?? 0,
+            Description = meal.Description ?? string.Empty,
+            IsActive = meal.IsActive,
+        };
+
+        return TypedResults.Ok(mealDto);
+    }
     public static async Task<IResult> ChangeMealState(
         int id,
         MealStateRequestDto request,
@@ -100,6 +119,29 @@ public static class WebAPI
 
         return TypedResults.Ok(menuDTOs);
     }
+
+    public static async Task<IResult> GetMenu(int id, MealDbContext db)
+{
+    var menu = await db.MenuItems
+        .Include(m => m.Meal)
+        .FirstOrDefaultAsync(m => m.MenuId == id);
+
+    if (menu is null)
+    {
+        return TypedResults.NotFound();
+    }
+
+    var menuDto = new MenuDto
+    {
+        Id = menu.MenuId,
+        Date = menu.MenuDate,
+        Portions = menu.Portions,
+        MealId = menu.MealId,
+        MealName = menu.Meal?.Name ?? "Unknown name"
+    };
+
+    return TypedResults.Ok(menuDto);
+}
 
     public static async Task<IResult> CreateNewMenu(MenuRequestDto request, MealDbContext db)
     {

@@ -1,0 +1,89 @@
+@page "/menus"
+@rendermode InteractiveServer
+@using UTB.Minute.Contracts
+@inject CanteenService CanteenService
+
+<PageTitle>Menu Manager</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<h3>Menu</h3>
+
+@if (menus is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Date</th>
+                <th scope="col">Portions</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (int i = 0; i < menus.Length; i++)
+            {
+                var menu = menus[i];
+
+                <tr>
+                    <th scope="row">@(i + 1)</th>
+                    <td>@menu.MealName</td>
+                    <td>@menu.Date</td>
+                    <td>@menu.Portions</td>
+                    <td>
+                        <a href="/update-menu/@menu.Id" class="btn btn-primary">Edit</a>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteMenu(menu.Id)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<br />
+
+<a class="btn btn-primary" href="/menus/create">Create New</a>
+
+@code {
+    private string? errorMessage;
+    private MenuDto[]? menus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            menus = await CanteenService.GetMenusAsync();
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "There has been an error";
+        }
+    }
+
+    private async Task DeleteMenu(int id)
+    {
+        try
+        {
+            await CanteenService.DeleteMenuAsync(id);
+            menus = await CanteenService.GetMenusAsync();
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Menu could not be deleted.";
+        }
+    }
+}

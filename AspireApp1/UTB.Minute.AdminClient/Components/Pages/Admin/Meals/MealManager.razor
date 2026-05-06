@@ -46,7 +46,9 @@ else
                                 @(meal.IsActive ? "Deactivate" : "Activate")
                             </button>
                         </td>
-                    <button type="edit" class="btn btn-primary">Edit Meal</button>
+                    <td>
+                        <a href="/meals/update/@meal.Id" class="btn btn-primary">Edit Meal</a>
+                    </td>
                 </tr>
             }
 
@@ -55,7 +57,7 @@ else
     </table>
 }
 <br />
-<a class="btn btn-primary" href="create-meal">Create New Meal</a>
+<a class="btn btn-primary" href="/meals/create">Create New Meal</a>
 
 @code {
     private string? errorMessage;
@@ -68,7 +70,7 @@ else
             meals = await CanteenService.GetMealsAsync();
         }
         catch(HttpRequestException){
-            errorMessage = "GG";
+            errorMessage = "There has been an error";
         }
     }
 

@@ -1,0 +1,94 @@
+@page "/menus/create"
+@rendermode InteractiveServer
+@using UTB.Minute.Contracts
+@inject NavigationManager Navigation
+@inject CanteenService CanteenService
+
+<PageTitle>Create Menu</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<h3>Create Menu</h3>
+
+<EditForm Model="menu" OnValidSubmit="CreateMenuSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Meal</label>
+        <InputSelect class="form-control" @bind-Value="menu.MealId">
+            <option value="0">-- Choose meal --</option>
+
+            @foreach (var meal in meals)
+            { 
+                if (@meal.IsActive == true)
+                {
+                    <option value="@meal.Id">@meal.Name</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label>Date</label>
+        <InputDate class="form-control" @bind-Value="menu.Date" />
+    </div>
+
+    <div class="mb-3">
+        <label>Portions</label>
+        <InputNumber class="form-control" @bind-Value="menu.Portions" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Menu</button>
+    <a class="btn btn-secondary" href="/menus">Cancel</a>
+</EditForm>
+
+@code {
+    private string? errorMessage;
+
+    private MenuRequestDto menu = new()
+    {
+        MealId = 0,
+        Date = DateOnly.FromDateTime(DateTime.Today),
+        Portions = 0,
+    };
+
+    private List<MealDto> meals = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await CanteenService.GetMealsAsync();
+
+        if (result is not null)
+        {
+            meals = result.ToList();
+        }
+    }
+
+    private async Task CreateMenuSubmit()
+    {
+        if (menu.MealId == 0)
+        {
+            errorMessage = "Please choose a meal.";
+            return;
+        }
+
+        if (menu.Date < DateOnly.FromDateTime(DateTime.Today))
+        {
+            errorMessage = "Date must not be older than today.";
+            return;
+        }
+
+        if (menu.Portions <= 0)
+        {
+            errorMessage = "Portions must be greater than 0.";
+            return;
+        }
+
+        await CanteenService.CreateMenuAsync(menu);
+        Navigation.NavigateTo("/menus");
+    }
+}
