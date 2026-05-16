@@ -1,49 +1,177 @@
-﻿@page "/student-menu"
-@attribute [StreamRendering]
-@using Microsoft.AspNetCore.Components.Authorization
+﻿@page "/"
+@rendermode InteractiveServer
 @using UTB.Minute.Contracts
+@inject CanteenService CanteenService
 
-<PageTitle>Menu</PageTitle>
+<h3>Today's Menu</h3>
 
-<h1>Menu</h1>
-
-<p>This component demonstrates showing data.</p>
-
-@if (meals is null)
+@if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <p>
-        <em>Loading...</em>
-    </p>
+    <div class="alert alert-warning">@errorMessage</div>
+}
+
+@if (isLoading)
+{
+    <p>Loading menu...</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th aria-label="Menu for today">PrintMenus (C)</th>
-            <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
+    @if (!todayMenus.Any())
+    {
+        <div class="alert alert-info">
+            No menu is available for today.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var menu in todayMenus)
+            {
+                bool isSoldOut = menu.Portions <= 0;
 
-        </tbody>
-    </table>
+                <div class="col-md-4 mb-3">
+                    <div class="card @(isSoldOut ? "bg-light text-muted border-secondary opacity-75" : "")">
+                        <div class="card-body">
+                            <h5 class="card-title">@menu.MealName</h5>
+
+                            <p class="card-text">
+                                <strong>Price:</strong> @menu.Price Kč
+                            </p>
+
+                            <p class="card-text">
+                                <strong>Available portions:</strong> @menu.Portions
+                            </p>
+
+                            @if (isSoldOut)
+                            {
+                                <span class="badge bg-secondary">Sold out</span>
+                            }
+                            else
+                            {
+                                <button class="btn btn-primary" @onclick="() => CreateOrder(menu.Id)">
+                                    Order
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <hr class="my-4" />
+
+    <h3>My Orders</h3>
+
+    @if (!studentOrders.Any())
+    {
+        <div class="alert alert-info">
+            You have no orders yet.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Meal</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in studentOrders)
+                {
+                <tr>
+                    <td>
+                        <strong>#@order.Id</strong>
+                    </td>
+                    <td>@order.MealName</td>
+                    <td>
+                        @(order.Date.HasValue ? order.Date.Value.ToString("dd.MM.yyyy") : "")
+                    </td>
+                    <td>
+                        <span class="@GetStatusBadgeClass(order.Status)">
+                            @order.Status
+                        </span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
-    @code {
-    private List<MealDto>? meals;
+    private string? errorMessage;
+    private bool isLoading = true;
+
+    private List<MenuDto> todayMenus = new();
+    private List<OrderDto> studentOrders = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPageDataAsync();
+    }
 
-        meals = new List<MealDto>
+    private async Task LoadPageDataAsync()
+    {
+        try
         {
-            new MealDto { Id = 1, Name = "Pizza", Price = 10, Description = "Cheese" },
-            new MealDto { Id = 2, Name = "Pasta", Price = 8, Description = "Tomato" }
+            isLoading = true;
+            errorMessage = null;
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            MenuDto[]? menus = await CanteenService.GetMenusAsync();
+            OrderDto[]? orders = await CanteenService.GetOrdersAsync();
+
+            todayMenus = menus?
+                .Where(menu => menu.Date == today)
+                .OrderBy(menu => menu.MealName)
+                .ToList()
+                ?? new List<MenuDto>();
+
+            studentOrders = orders?
+                .OrderBy(order => order.Id)
+                .ToList()
+                ?? new List<OrderDto>();
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateOrder(int menuId)
+    {
+        errorMessage = null;
+
+        try
+        {
+            await CanteenService.CreateOrderAsync(menuId);
+            await LoadPageDataAsync();
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = e.Message;
+        }
+    }
+
+    private static string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Preparing" => "badge bg-warning text-dark",
+            "Ready" => "badge bg-success",
+            "Cancelled" => "badge bg-danger",
+            "Finished" => "badge bg-secondary",
+            _ => "badge bg-info text-dark"
         };
     }
 }
- }

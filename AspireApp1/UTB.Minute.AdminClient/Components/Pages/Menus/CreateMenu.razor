@@ -1,23 +1,32 @@
-@page "/update-menu/{MenuId:int}"
+@page "/menus/create"
 @rendermode InteractiveServer
 @using UTB.Minute.Contracts
 @inject NavigationManager Navigation
 @inject CanteenService CanteenService
 
-<h3>Update Menu</h3>
+<PageTitle>Create Menu</PageTitle>
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <div class="alert alert-danger">@errorMessage</div>
+    <div class="alert alert-warning">@errorMessage</div>
 }
+
+<h3>Create Menu</h3>
 
 @if (isLoading)
 {
     <p>Loading...</p>
 }
+else if (!meals.Any(m => m.IsActive))
+{
+    <div class="alert alert-warning">
+        No active meals are available. Create or activate a meal before creating a menu.
+    </div>
+    <a class="btn btn-secondary" href="/menus">Back to menus</a>
+}
 else
 {
-    <EditForm Model="menu" OnValidSubmit="UpdateMenuSubmit">
+    <EditForm Model="menu" OnValidSubmit="CreateMenuSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -26,7 +35,7 @@ else
             <InputSelect class="form-control" @bind-Value="menu.MealId">
                 <option value="0">-- Choose meal --</option>
 
-                @foreach (var meal in meals)
+                @foreach (var meal in meals.Where(m => m.IsActive))
                 {
                     <option value="@meal.Id">@meal.Name</option>
                 }
@@ -43,23 +52,23 @@ else
             <InputNumber class="form-control" @bind-Value="menu.Portions" />
         </div>
 
-        <button type="submit" class="btn btn-primary">Confirm</button>
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+            @(isSubmitting ? "Saving..." : "Create Menu")
+        </button>
         <a class="btn btn-secondary" href="/menus">Cancel</a>
     </EditForm>
 }
 
 @code {
-    [Parameter]
-    public int MenuId { get; set; }
-
     private string? errorMessage;
     private bool isLoading = true;
+    private bool isSubmitting;
 
     private MenuRequestDto menu = new()
     {
         MealId = 0,
         Date = DateOnly.FromDateTime(DateTime.Today),
-        Portions = 0
+        Portions = 0,
     };
 
     private List<MealDto> meals = new();
@@ -68,24 +77,8 @@ else
     {
         try
         {
-            var mealsResult = await CanteenService.GetMealsAsync();
-
-            if (mealsResult is not null)
-            {
-                meals = mealsResult.ToList();
-            }
-
-            MenuDto? existingMenu = await CanteenService.GetMenuAsync(MenuId);
-
-            if (existingMenu is null)
-            {
-                errorMessage = "Menu was not found.";
-                return;
-            }
-
-            menu.MealId = existingMenu.MealId;
-            menu.Date = existingMenu.Date;
-            menu.Portions = existingMenu.Portions;
+            var result = await CanteenService.GetMealsAsync();
+            meals = result?.ToList() ?? new List<MealDto>();
         }
         catch (HttpRequestException e)
         {
@@ -97,34 +90,57 @@ else
         }
     }
 
-    private async Task UpdateMenuSubmit()
+    private async Task CreateMenuSubmit()
     {
-        if (menu.MealId == 0)
-        {
-            errorMessage = "Please choose a meal.";
-            return;
-        }
+        errorMessage = null;
 
-        if (menu.Date < DateOnly.FromDateTime(DateTime.Today))
+        if (!ValidateMenuForm())
         {
-            errorMessage = "Date must not be older than today.";
-            return;
-        }
-
-        if (menu.Portions <= 0)
-        {
-            errorMessage = "Portions must be greater than 0.";
             return;
         }
 
         try
         {
-            await CanteenService.UpdateMenuAsync(menu, MenuId);
+            isSubmitting = true;
+            await CanteenService.CreateMenuAsync(menu);
             Navigation.NavigateTo("/menus");
         }
         catch (HttpRequestException e)
         {
             errorMessage = e.Message;
         }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private bool ValidateMenuForm()
+    {
+        if (menu.MealId == 0)
+        {
+            errorMessage = "Please choose a meal.";
+            return false;
+        }
+
+        if (!meals.Any(m => m.Id == menu.MealId && m.IsActive))
+        {
+            errorMessage = "Please choose an active meal.";
+            return false;
+        }
+
+        if (menu.Date < DateOnly.FromDateTime(DateTime.Today))
+        {
+            errorMessage = "Date must not be older than today.";
+            return false;
+        }
+
+        if (menu.Portions <= 0)
+        {
+            errorMessage = "Portions must be greater than 0.";
+            return false;
+        }
+
+        return true;
     }
 }

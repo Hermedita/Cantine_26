@@ -1,0 +1,140 @@
+@page "/menus/update/{MenuId:int}"
+@rendermode InteractiveServer
+@using UTB.Minute.Contracts
+@inject NavigationManager Navigation
+@inject CanteenService CanteenService
+
+<h3>Update Menu</h3>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-warning">@errorMessage</div>
+}
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="menu" OnValidSubmit="UpdateMenuSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Meal</label>
+            <InputSelect class="form-control" @bind-Value="menu.MealId">
+                <option value="0">-- Choose meal --</option>
+
+                @foreach (var meal in meals.Where(m => m.IsActive || m.Id == menu.MealId))
+                {
+                    <option value="@meal.Id">@(meal.Name)@(meal.IsActive ? string.Empty : " (inactive)")</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label>Date</label>
+            <InputDate class="form-control" @bind-Value="menu.Date" />
+        </div>
+
+        <div class="mb-3">
+            <label>Portions</label>
+            <InputNumber class="form-control" @bind-Value="menu.Portions" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Confirm
+        </button>
+
+        <a class="btn btn-secondary" href="/menus">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int MenuId { get; set; }
+
+    private string? errorMessage;
+    private bool isLoading = true;
+
+    private MenuRequestDto menu = new()
+    {
+        MealId = 0,
+        Date = DateOnly.FromDateTime(DateTime.Today),
+        Portions = 0
+    };
+
+    private List<MealDto> meals = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var mealsResult = await CanteenService.GetMealsAsync();
+            meals = mealsResult?.ToList() ?? new List<MealDto>();
+
+            MenuDto? existingMenu = await CanteenService.GetMenuAsync(MenuId);
+
+            if (existingMenu is null)
+            {
+                errorMessage = "Menu was not found.";
+                return;
+            }
+
+            menu.MealId = existingMenu.MealId;
+            menu.Date = existingMenu.Date;
+            menu.Portions = existingMenu.Portions;
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+private async Task UpdateMenuSubmit()
+{
+    errorMessage = null;
+
+    if (!ValidateMenuForm())
+    {
+        return;
+    }
+
+    try
+    {
+        await CanteenService.UpdateMenuAsync(menu, MenuId);
+        Navigation.NavigateTo("/menus");
+    }
+    catch (HttpRequestException e)
+    {
+        errorMessage = e.Message;
+    }
+}
+    private bool ValidateMenuForm()
+    {
+        if (menu.MealId == 0)
+        {
+            errorMessage = "Please choose a meal.";
+            return false;
+        }
+
+        if (menu.Date < DateOnly.FromDateTime(DateTime.Today))
+        {
+            errorMessage = "Date must not be older than today.";
+            return false;
+        }
+
+        if (menu.Portions <= 0)
+        {
+            errorMessage = "Portions must be greater than 0.";
+            return false;
+        }
+
+        return true;
+    }
+}

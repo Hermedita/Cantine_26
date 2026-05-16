@@ -101,24 +101,26 @@ public static class WebAPI
         return TypedResults.NoContent();
     }
 
-    public static async Task<IResult> PrintMenus(MealDbContext db)
-    {
-        var menus = await db
-            .MenuItems.Include(menu => menu.Meal)
-            .Where(menu => menu.Portions > 0 && menu.Meal!.IsActive == true)
-            .ToListAsync();
-
-        var menuDTOs = menus.Select(m => new MenuDto
+public static async Task<IResult> PrintMenus(MealDbContext db)
+{
+    var menus = await db
+        .MenuItems
+        .Include(menu => menu.Meal)
+        .Where(menu => menu.Meal != null && menu.Meal.IsActive)
+        .Select(menu => new MenuDto
         {
-            Id = m.MenuId,
-            Date = m.MenuDate,
-            Portions = m.Portions,
-            MealId = m.MealId,
-            MealName = m.Meal?.Name ?? "Uknown name",
-        });
+            Id = menu.MenuId,
+            Date = menu.MenuDate,
+            Portions = menu.Portions,
+            MealId = menu.MealId,
+            MealName = menu.Meal != null ? menu.Meal.Name ?? "Unknown name" : "Unknown name",
+            Price = menu.Meal != null ? menu.Meal.Price ?? 0 : 0
+        })
+        .ToListAsync();
 
-        return TypedResults.Ok(menuDTOs);
-    }
+    return TypedResults.Ok(menus);
+}
+
 
     public static async Task<IResult> GetMenu(int id, MealDbContext db)
 {
@@ -143,75 +145,132 @@ public static class WebAPI
     return TypedResults.Ok(menuDto);
 }
 
-    public static async Task<IResult> CreateNewMenu(MenuRequestDto request, MealDbContext db)
+public static async Task<IResult> CreateNewMenu(MenuRequestDto request, MealDbContext db)
+{
+    if (request.MealId <= 0)
     {
-        if (request.Portions <= 0)
-        {
-            return TypedResults.BadRequest("Počet porcí musí být větší než 0!");
-        }
+        return TypedResults.BadRequest("Prosím, zvolte jídlo.");
+    }
 
-        var meal = await db.Meals.FirstOrDefaultAsync(m =>
-            m.MealId == request.MealId && m.IsActive
-        );
-        if (meal == null)
-        {
-            return TypedResults.BadRequest("Zvolené jídlo neexistuje nebo není aktivní!");
-        }
+    if (request.Portions <= 0)
+    {
+        return TypedResults.BadRequest("Počet porcí musí být větší než 0!");
+    }
 
-        var duplicateMenu = await db.MenuItems.FirstOrDefaultAsync(m =>
-            m.MealId == request.MealId && m.MenuDate == request.Date
-        );
-        if (duplicateMenu != null)
-        {
-            return TypedResults.BadRequest(
-                "Tohle jídlo už je na tento den naplánované! Pokud chcete více porcí, upravte existující menu."
-            );
-        }
+    if (request.Date < DateOnly.FromDateTime(DateTime.Today))
+    {
+        return TypedResults.BadRequest("Datum nesmí být starší než dnes.");
+    }
 
-        var newMenuEntity = new Menu
-        {
-            MealId = request.MealId,
-            MenuDate = request.Date,
-            Portions = request.Portions,
-        };
+    var meal = await db.Meals.FirstOrDefaultAsync(m =>
+        m.MealId == request.MealId && m.IsActive
+    );
 
-        db.MenuItems.Add(newMenuEntity);
+    if (meal == null)
+    {
+        return TypedResults.BadRequest("Zvolené jídlo neexistuje nebo není aktivní!");
+    }
+
+    var duplicateMenu = await db.MenuItems.FirstOrDefaultAsync(m =>
+        m.MealId == request.MealId && m.MenuDate == request.Date
+    );
+
+    if (duplicateMenu != null)
+    {
+        duplicateMenu.Portions += request.Portions;
+
         await db.SaveChangesAsync();
 
-        var responseDto = new MenuDto
+        var mergedResponseDto = new MenuDto
         {
-            Id = newMenuEntity.MenuId,
-            Date = newMenuEntity.MenuDate,
-            Portions = newMenuEntity.Portions,
-            MealId = newMenuEntity.MealId,
+            Id = duplicateMenu.MenuId,
+            Date = duplicateMenu.MenuDate,
+            Portions = duplicateMenu.Portions,
+            MealId = duplicateMenu.MealId,
             MealName = meal.Name ?? "Unknown",
         };
 
-        return TypedResults.Created($"/menus/{newMenuEntity.MenuId}", responseDto);
+        return TypedResults.Ok(mergedResponseDto);
     }
 
-    public static async Task<IResult> UpdateMenu(int id, MenuRequestDto request, MealDbContext db)
+    var newMenuEntity = new Menu
     {
-        var existingMenu = await db.MenuItems.FindAsync(id);
-        if (existingMenu == null)
-        {
-            return TypedResults.NotFound();
-        }
+        MealId = request.MealId,
+        MenuDate = request.Date,
+        Portions = request.Portions,
+    };
 
-        var mealExists = await db.Meals.AnyAsync(m => m.MealId == request.MealId && m.IsActive);
-        if (!mealExists)
-        {
-            return TypedResults.BadRequest("Zvolené jídlo neexistuje nebo není aktivní!");
-        }
+    db.MenuItems.Add(newMenuEntity);
+    await db.SaveChangesAsync();
 
-        existingMenu.MenuDate = request.Date;
-        existingMenu.Portions = request.Portions;
-        existingMenu.MealId = request.MealId;
+    var responseDto = new MenuDto
+    {
+        Id = newMenuEntity.MenuId,
+        Date = newMenuEntity.MenuDate,
+        Portions = newMenuEntity.Portions,
+        MealId = newMenuEntity.MealId,
+        MealName = meal.Name ?? "Unknown",
+    };
+
+    return TypedResults.Created($"/menus/{newMenuEntity.MenuId}", responseDto);
+}
+   public static async Task<IResult> UpdateMenu(int id, MenuRequestDto request, MealDbContext db)
+{
+    var existingMenu = await db.MenuItems.FindAsync(id);
+    if (existingMenu == null)
+    {
+        return TypedResults.NotFound("Menu was not found.");
+    }
+
+    if (request.MealId <= 0)
+    {
+        return TypedResults.BadRequest("Please choose a meal.");
+    }
+
+    if (request.Date < DateOnly.FromDateTime(DateTime.Today))
+    {
+        return TypedResults.BadRequest("Date must not be older than today.");
+    }
+
+    if (request.Portions <= 0)
+    {
+        return TypedResults.BadRequest("Portions must be greater than 0.");
+    }
+
+    var mealExists = await db.Meals.AnyAsync(m =>
+        m.MealId == request.MealId && m.IsActive
+    );
+
+    if (!mealExists)
+    {
+        return TypedResults.BadRequest("Selected meal does not exist or is not active.");
+    }
+
+    var duplicateMenu = await db.MenuItems.FirstOrDefaultAsync(m =>
+        m.MenuId != id &&
+        m.MealId == request.MealId &&
+        m.MenuDate == request.Date
+    );
+
+    if (duplicateMenu is not null)
+    {
+        duplicateMenu.Portions += request.Portions;
+
+        db.MenuItems.Remove(existingMenu);
 
         await db.SaveChangesAsync();
 
         return TypedResults.NoContent();
     }
+
+    existingMenu.MenuDate = request.Date;
+    existingMenu.Portions = request.Portions;
+    existingMenu.MealId = request.MealId;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.NoContent();
+}
 
     public static async Task<IResult> DeleteMenu(int id, MealDbContext db)
     {

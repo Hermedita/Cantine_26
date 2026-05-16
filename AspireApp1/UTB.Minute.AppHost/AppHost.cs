@@ -5,6 +5,7 @@ var sql = builder
 
 var database = sql.AddDatabase("database");
 
+
 builder.AddProject<Projects.UTB_Minute_DbManager>("utb-minute-dbmanager")
     .WithReference(database)
     .WithHttpCommand("reset-db", "Reset Database")
@@ -15,6 +16,10 @@ var api = builder.AddProject<Projects.UTB_Minute_WebApi>("web-api")
     .WaitFor(database);
 
 builder.AddProject<Projects.UTB_Minute_AdminClient>("admin-client")
+    .WithReference(api) 
+    .WaitFor(api);
+
+builder.AddProject<Projects.UTB_Minute_CanteenClient>("canteen-client")
     .WithReference(api) 
     .WaitFor(api);
 

@@ -44,24 +44,46 @@ namespace UTB.Minute.AdminClient
             return await httpClient.GetFromJsonAsync<MenuDto>($"/menus/{id}");
         }
 
-             public async Task UpdateMenuAsync(MenuRequestDto menu, int id)
+        public async Task UpdateMenuAsync(MenuRequestDto menu, int id)
         {
-            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"/menus/{id}", menu);
-            response.EnsureSuccessStatusCode();
+            var response = await httpClient.PutAsJsonAsync($"/menus/{id}", menu);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    errorMessage = "Menu could not be updated.";
+                }
+
+                throw new HttpRequestException(errorMessage.Trim('"'));
+            }
         }
 
         public async Task CreateMenuAsync(MenuRequestDto menu)
         {
             var response = await httpClient.PostAsJsonAsync("/menus", menu);
-            response.EnsureSuccessStatusCode();
-        }
 
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    errorMessage = "Menu could not be created.";
+                }
+
+                throw new HttpRequestException(errorMessage.Trim('"'));
+            }
+        }
         public async Task DeleteMenuAsync(int id)
         {
             var response = await httpClient.DeleteAsync($"/menus/{id}");
 
             response.EnsureSuccessStatusCode();
         }
+
 
 
     }

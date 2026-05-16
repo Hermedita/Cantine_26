@@ -8,6 +8,7 @@ public class MenuDto
 
     public int MealId {get;set;}
     public string? MealName {get;set;} = string.Empty;
+    public int Price { get; set; }
 }
 
 public class MenuRequestDto
