@@ -1,4 +1,5 @@
 using UTB.Minute.Contracts;
+using System.Net.Http.Json;
 
 namespace UTB.Minute.AdminClient
 {
@@ -8,32 +9,38 @@ namespace UTB.Minute.AdminClient
         {
             MealDto[]? meals = await httpClient.GetFromJsonAsync<MealDto[]>("/meals");
             return meals;
-        } 
+        }
 
         public async Task CreateMealAsync(MealRequestDto meal)
         {
             var response = await httpClient.PostAsJsonAsync("/meals", meal);
             response.EnsureSuccessStatusCode();
+
+            await AutoNotifyChangesAsync();
         }
 
         public async Task ChangeMealStateAsync(MealStateRequestDto mealStateRequest, int id)
         {
             var response = await httpClient.PatchAsJsonAsync($"/meals/{id}/state", mealStateRequest);
             response.EnsureSuccessStatusCode();
+
+            await AutoNotifyChangesAsync();
         }
 
         public async Task UpdateMealAsync(MealRequestDto meal, int id)
         {
             HttpResponseMessage response = await httpClient.PutAsJsonAsync($"/meals/{id}", meal);
             response.EnsureSuccessStatusCode();
+
+            await AutoNotifyChangesAsync();
         }
 
         public async Task<MealDto?> GetMealAsync(int id)
-        { 
+        {
             MealDto? meal = await httpClient.GetFromJsonAsync<MealDto>($"/meals/{id}");
             return meal;
         }
-        
+
         public async Task<MenuDto[]?> GetMenusAsync()
         {
             return await httpClient.GetFromJsonAsync<MenuDto[]>("/menus");
@@ -51,14 +58,10 @@ namespace UTB.Minute.AdminClient
             if (!response.IsSuccessStatusCode)
             {
                 string errorMessage = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(errorMessage))
-                {
-                    errorMessage = "Menu could not be updated.";
-                }
-
+                if (string.IsNullOrWhiteSpace(errorMessage)) errorMessage = "Menu could not be updated.";
                 throw new HttpRequestException(errorMessage.Trim('"'));
             }
+            await AutoNotifyChangesAsync();
         }
 
         public async Task CreateMenuAsync(MenuRequestDto menu)
@@ -68,24 +71,49 @@ namespace UTB.Minute.AdminClient
             if (!response.IsSuccessStatusCode)
             {
                 string errorMessage = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(errorMessage))
-                {
-                    errorMessage = "Menu could not be created.";
-                }
-
+                if (string.IsNullOrWhiteSpace(errorMessage)) errorMessage = "Menu could not be created.";
                 throw new HttpRequestException(errorMessage.Trim('"'));
             }
+
+            await AutoNotifyChangesAsync();
         }
+
         public async Task DeleteMenuAsync(int id)
         {
             var response = await httpClient.DeleteAsync($"/menus/{id}");
 
             response.EnsureSuccessStatusCode();
+            await AutoNotifyChangesAsync();
         }
 
+        private async Task AutoNotifyChangesAsync()
+        {
+            try
+            {
+                await NotifyOrderUpdateAsync(0, 0);
+            }
+            catch
+            {
+                // Selhání notifikace by nemělo shodit uložení dat v administraci
+            }
+        }
 
+        public async Task NotifyOrderUpdateAsync(int totalPortions, decimal totalPrice)
+        {
+            var message = new OrderUpdateNotificationDto
+            {
+                TotalPortions = totalPortions,
+                TotalPrice = totalPrice
+            };
 
+            var response = await httpClient.PostAsJsonAsync("/api/orders/notify-change", message);
+            response.EnsureSuccessStatusCode();
+        }
     }
-    
+
+    public class OrderUpdateNotificationDto
+    {
+        public int TotalPortions { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
 }

@@ -43,11 +43,14 @@ using (var scope = app.Services.CreateScope())
 
     if (!context.Meals.Any())
     {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly tomorrow = today.AddDays(1);
+
         var rizek = new Meal { Name = "Kuřecí řízek", Price = 135, IsActive = true, Description = "Smažený řízek" };
         var smazak = new Meal { Name = "Smažák", Price = 120, IsActive = true, Description = "Sýr" };
 
-        var rizekMenu = new Menu { Meal = rizek, MenuDate = new DateOnly(2026, 4, 6), Portions = 50 };
-        var smazakMenu = new Menu { Meal = smazak, MenuDate = new DateOnly(2026, 4, 7), Portions = 0 };
+        var rizekMenu = new Menu { Meal = rizek, MenuDate = today, Portions = 50 };
+        var smazakMenu = new Menu { Meal = smazak, MenuDate = tomorrow, Portions = 0 };
 
         context.Meals.AddRange(rizek, smazak);
         context.MenuItems.AddRange(rizekMenu, smazakMenu);

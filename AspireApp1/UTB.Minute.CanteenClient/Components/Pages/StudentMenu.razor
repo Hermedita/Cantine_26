@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @using UTB.Minute.Contracts
 @inject CanteenService CanteenService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <h3>Today's Menu</h3>
 
@@ -83,20 +85,20 @@ else
             <tbody>
                 @foreach (var order in studentOrders)
                 {
-                <tr>
-                    <td>
-                        <strong>#@order.Id</strong>
-                    </td>
-                    <td>@order.MealName</td>
-                    <td>
-                        @(order.Date.HasValue ? order.Date.Value.ToString("dd.MM.yyyy") : "")
-                    </td>
-                    <td>
-                        <span class="@GetStatusBadgeClass(order.Status)">
-                            @order.Status
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <strong>#@order.Id</strong>
+                        </td>
+                        <td>@order.MealName</td>
+                        <td>
+                            @(order.Date.HasValue ? order.Date.Value.ToString("dd.MM.yyyy") : "")
+                        </td>
+                        <td>
+                            <span class="@GetStatusBadgeClass(order.Status)">
+                                @order.Status
+                            </span>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -110,9 +112,26 @@ else
     private List<MenuDto> todayMenus = new();
     private List<OrderDto> studentOrders = new();
 
+    private DotNetObjectReference<StudentMenu>? objRef;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPageDataAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+
+            await LoadPageDataAsync();
+
+            var sseUrl = "/api/orders/sse";
+            await JSRuntime.InvokeVoidAsync("setupSse", sseUrl, objRef);
+
+            StateHasChanged();
+        }
     }
 
     private async Task LoadPageDataAsync()
@@ -122,10 +141,16 @@ else
             isLoading = true;
             errorMessage = null;
 
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now.Date);
 
             MenuDto[]? menus = await CanteenService.GetMenusAsync();
             OrderDto[]? orders = await CanteenService.GetOrdersAsync();
+
+            Console.WriteLine($"Dnešní datum klienta: {today}");
+            if (menus != null && menus.Any())
+            {
+                Console.WriteLine($"První menu v DB má datum: {menus.First().Date}");
+            }
 
             todayMenus = menus?
                 .Where(menu => menu.Date == today)
@@ -145,7 +170,19 @@ else
         finally
         {
             isLoading = false;
+
+            StateHasChanged();
         }
+    }
+
+    [JSInvokable]
+    public async Task ReceiveOrderUpdate(int portions, decimal price)
+    {
+        await InvokeAsync(async () =>
+        {
+            await LoadPageDataAsync();
+            StateHasChanged();
+        });
     }
 
     private async Task CreateOrder(int menuId)
@@ -173,5 +210,11 @@ else
             "Finished" => "badge bg-secondary",
             _ => "badge bg-info text-dark"
         };
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+        _ = JSRuntime.InvokeVoidAsync("closeSse");
     }
 }

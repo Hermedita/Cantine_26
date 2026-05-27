@@ -6,6 +6,8 @@ builder.AddServiceDefaults();
 
 builder.AddSqlServerDbContext<MealDbContext>("database");
 
+builder.Services.AddSingleton<SseNotificationService>();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -26,5 +28,29 @@ app.MapGet("/menus/{id:int}", WebAPI.GetMenu);
 app.MapGet("/orders", WebAPI.PrintOrders);
 app.MapPost("/orders", WebAPI.CreateNewOrder);
 app.MapPut("/orders/{id}/status", WebAPI.UpdateOrderStatus);
+
+app.MapGet("/api/orders/sse", async (HttpContext context, SseNotificationService sseService, CancellationToken ct) =>
+{
+    context.Response.Headers.Add("Content-Type", "text/event-stream");
+    context.Response.Headers.Add("Cache-Control", "no-cache");
+    context.Response.Headers.Add("Connection", "keep-alive");
+
+    using var writer = new StreamWriter(context.Response.Body);
+    sseService.AddClient(writer);
+
+    try
+    {
+        await Task.Delay(Timeout.Infinite, ct);
+    }
+    catch (TaskCanceledException)
+    {
+        // Klient se odpojil
+    }
+});
+app.MapPost("/api/orders/notify-change", async (OrderUpdateMessage model, SseNotificationService sseService) =>
+{
+    await sseService.BroadcastOrderUpdateAsync(model);
+    return Results.Ok();
+});
 
 app.Run();
