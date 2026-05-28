@@ -13,6 +13,21 @@
 
 <h3>Meals</h3>
 
+<AuthorizeView Roles="admin-admin">
+    <Authorized>
+        <p>Welcome back @context.User.Identity?.Name !</p>
+
+        <form action="logout" method="post">
+            <AntiforgeryToken />
+            <button type="submit" class="nav-link btn btn-link">Logout</button>
+        </form>
+
+    </Authorized>
+    <NotAuthorized>
+        <p><a href="/login?returnUrl=/">Log in</a> please.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
 @if(meals is null)
 {
     <p>Loading ... </p>    
@@ -63,14 +78,30 @@ else
     private string? errorMessage;
     private MealDto[]? meals;
 
+    [Inject] public AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
-        try
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
         {
-            meals = await CanteenService.GetMealsAsync();
+            try
+            {
+                // Data načteme, jen pokud je uživatel přihlášený
+                meals = await CanteenService.GetMealsAsync();
+            }
+            catch (HttpRequestException)
+            {
+                errorMessage = "There has been an error loading meals.";
+            }
         }
-        catch(HttpRequestException){
-            errorMessage = "There has been an error";
+        else
+        {
+            // Pokud není přihlášený, nastavíme prázdné pole (nebo null),
+            // aby se nezobrazoval nápis "Loading...", ale uživatel viděl jen výzvu k přihlášení
+            meals = Array.Empty<MealDto>();
         }
     }
 
