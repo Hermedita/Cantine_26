@@ -6,14 +6,29 @@ builder.AddServiceDefaults();
 
 builder.AddSqlServerDbContext<MealDbContext>("database");
 
+builder.Services.AddAuthentication()
+    .AddKeycloakJwtBearer(
+        serviceName: "keycloak",
+        realm: "utb-minute",
+        options =>
+        {
+            options.Audience = "utb-minute-webapi";
+            options.RequireHttpsMetadata = false; // jen pro dev
+        }
+    );
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddSingleton<SseNotificationService>();
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapGet("/meals", WebAPI.PrintMeals);
+app.MapGet("/meals", WebAPI.PrintMeals).RequireAuthorization(pb => pb.RequireRole("admin-admin"));
 app.MapGet("/meals/{id}", WebAPI.GetMeal);
 app.MapPost("/meals", WebAPI.CreateNewMeal);
 app.MapPut("/meals/{id}", WebAPI.UpdateMeal);
