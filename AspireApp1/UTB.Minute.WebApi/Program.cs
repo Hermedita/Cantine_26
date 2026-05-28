@@ -9,8 +9,7 @@ builder.AddServiceDefaults();
 
 builder.AddSqlServerDbContext<MealDbContext>("database");
 
-<<<<<<< Updated upstream
-=======
+
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",
