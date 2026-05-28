@@ -1,9 +1,11 @@
 ﻿@page "/"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using UTB.Minute.Contracts
 @inject CanteenService CanteenService
 @inject IJSRuntime JSRuntime
 @implements IDisposable
+
+<PageTitle>Today's Menu</PageTitle>
 
 <h3>Today's Menu</h3>
 
@@ -20,9 +22,7 @@ else
 {
     @if (!todayMenus.Any())
     {
-        <div class="alert alert-info">
-            No menu is available for today.
-        </div>
+        <div class="alert alert-info">No menu is available for today.</div>
     }
     else
     {
@@ -35,14 +35,8 @@ else
                     <div class="card @(isSoldOut ? "bg-light text-muted border-secondary opacity-75" : "")">
                         <div class="card-body">
                             <h5 class="card-title">@menu.MealName</h5>
-
-                            <p class="card-text">
-                                <strong>Price:</strong> @menu.Price Kč
-                            </p>
-
-                            <p class="card-text">
-                                <strong>Available portions:</strong> @menu.Portions
-                            </p>
+                            <p class="card-text"><strong>Price:</strong> @menu.Price Kč</p>
+                            <p class="card-text"><strong>Available portions:</strong> @menu.Portions</p>
 
                             @if (isSoldOut)
                             {
@@ -63,13 +57,11 @@ else
 
     <hr class="my-4" />
 
-    <h3>My Orders</h3>
+    <h3>All Active Orders</h3>
 
     @if (!studentOrders.Any())
     {
-        <div class="alert alert-info">
-            You have no orders yet.
-        </div>
+        <div class="alert alert-info">There are no orders yet.</div>
     }
     else
     {
@@ -86,18 +78,10 @@ else
                 @foreach (var order in studentOrders)
                 {
                     <tr>
-                        <td>
-                            <strong>#@order.Id</strong>
-                        </td>
+                        <td><strong>#@order.Id</strong></td>
                         <td>@order.MealName</td>
-                        <td>
-                            @(order.Date.HasValue ? order.Date.Value.ToString("dd.MM.yyyy") : "")
-                        </td>
-                        <td>
-                            <span class="@GetStatusBadgeClass(order.Status)">
-                                @order.Status
-                            </span>
-                        </td>
+                        <td>@(order.Date.HasValue ? order.Date.Value.ToString("dd.MM.yyyy") : "")</td>
+                        <td><span class="@GetStatusBadgeClass(order.Status)">@order.Status</span></td>
                     </tr>
                 }
             </tbody>
@@ -108,29 +92,42 @@ else
 @code {
     private string? errorMessage;
     private bool isLoading = true;
-
     private List<MenuDto> todayMenus = new();
     private List<OrderDto> studentOrders = new();
-
-    private DotNetObjectReference<StudentMenu>? objRef;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadPageDataAsync();
-    }
+    private DotNetObjectReference<ComponentBase>? objRef; // Opraven typ reference pro JS
+    private string? anonymousUserId;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            objRef = DotNetObjectReference.Create(this);
+            try
+            {
+                // 1. Vyřešíme anonymní identitu
+                anonymousUserId = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "anon_user_id");
+                if (string.IsNullOrEmpty(anonymousUserId))
+                {
+                    anonymousUserId = Guid.NewGuid().ToString();
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "anon_user_id", anonymousUserId);
+                }
 
-            await LoadPageDataAsync();
+                // 2. Načteme data
+                await LoadPageDataAsync();
 
-            var sseUrl = "/api/orders/sse";
-            await JSRuntime.InvokeVoidAsync("setupSse", sseUrl, objRef);
-
-            StateHasChanged();
+                // 3. Spustíme SSE stream
+                objRef = DotNetObjectReference.Create<ComponentBase>(this);
+                var sseUrl = "http://web-api/api/orders/sse"; // Absolutní adresa pro jistotu
+                await JSRuntime.InvokeVoidAsync("setupSse", sseUrl, objRef);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "JS Runtime error: " + ex.Message;
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
     }
 
@@ -143,61 +140,41 @@ else
 
             DateOnly today = DateOnly.FromDateTime(DateTime.Now.Date);
 
-            MenuDto[]? menus = await CanteenService.GetMenusAsync();
-            OrderDto[]? orders = await CanteenService.GetOrdersAsync();
+            var menus = await CanteenService.GetMenusAsync();
+            var orders = await CanteenService.GetOrdersAsync();
 
-            Console.WriteLine($"Dnešní datum klienta: {today}");
-            if (menus != null && menus.Any())
-            {
-                Console.WriteLine($"První menu v DB má datum: {menus.First().Date}");
-            }
-
-            todayMenus = menus?
-                .Where(menu => menu.Date == today)
-                .OrderBy(menu => menu.MealName)
-                .ToList()
-                ?? new List<MenuDto>();
-
-            studentOrders = orders?
-                .OrderBy(order => order.Id)
-                .ToList()
-                ?? new List<OrderDto>();
+            todayMenus = menus?.Where(menu => menu.Date == today).OrderBy(menu => menu.MealName).ToList() ?? new();
+            studentOrders = orders?.OrderBy(order => order.Id).ToList() ?? new();
         }
-        catch (HttpRequestException e)
+        catch (Exception e)
         {
-            errorMessage = e.Message;
+            errorMessage = "API Error: " + e.Message;
         }
         finally
         {
             isLoading = false;
-
             StateHasChanged();
         }
     }
 
-    [JSInvokable]
-    public async Task ReceiveOrderUpdate(int portions, decimal price)
-    {
-        await InvokeAsync(async () =>
-        {
-            await LoadPageDataAsync();
-            StateHasChanged();
-        });
-    }
-
     private async Task CreateOrder(int menuId)
     {
-        errorMessage = null;
-
         try
         {
             await CanteenService.CreateOrderAsync(menuId);
             await LoadPageDataAsync();
         }
-        catch (HttpRequestException e)
+        catch (Exception e)
         {
-            errorMessage = e.Message;
+            errorMessage = "Could not create order: " + e.Message;
         }
+    }
+
+    // JS volá tuto metodu při změně přes SSE, aby se menu překreslilo
+    [JSInvokable]
+    public async Task RefreshDataAsync()
+    {
+        await LoadPageDataAsync();
     }
 
     private static string GetStatusBadgeClass(string status)
@@ -215,6 +192,7 @@ else
     public void Dispose()
     {
         objRef?.Dispose();
+        // Bezpečné ošetření JS volání při odchodu ze stránky
         _ = JSRuntime.InvokeVoidAsync("closeSse");
     }
 }

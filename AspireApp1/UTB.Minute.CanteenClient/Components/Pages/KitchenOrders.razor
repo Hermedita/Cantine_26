@@ -1,110 +1,108 @@
 @page "/kitchen/orders"
 @using UTB.Minute.Contracts
-@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject CanteenService CanteenService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Kitchen Orders</PageTitle>
 
 <h3>Kitchen Orders</h3>
 
-@if (!string.IsNullOrWhiteSpace(errorMessage))
+@if (!isCookLoggedIn)
 {
-    <div class="alert alert-warning">@errorMessage</div>
-}
-
-@if (!string.IsNullOrWhiteSpace(successMessage))
-{
-    <div class="alert alert-success">@successMessage</div>
-}
-
-@if (isLoading)
-{
-    <p>Loading orders...</p>
-}
-else if (!orders.Any())
-{
-    <div class="alert alert-info">
-        There are no orders.
+    <div class="card text-center my-5 p-5 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Sekce pro personál kuchyně</h4>
+            <p class="card-text text-muted mb-4">Pro prohlížení a správu objednávek v reálném čase se prosím nejprve přihlaste svým kuchařským účtem.</p>
+            <button class="btn btn-primary btn-lg px-5" @onclick="LoginCook">
+                Přihlásit se do kuchyně
+            </button>
+        </div>
     </div>
 }
 else
 {
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th style="width: 90px;">Order</th>
-                <th>Meal</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th style="width: 300px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in orders)
-            {
-                <tr class="@(order.Status == OrderStatus.Cancelled.ToString() ? "table-secondary text-muted" : "")">
-                    <td>
-                        <strong>#@order.Id</strong>
-                    </td>
-                    <td>@order.MealName</td>
-                    <td>
-                        @(order.Date.HasValue
-                            ? order.Date.Value.ToString("dd.MM.yyyy")
-                            : "")
-                    </td>
-                    <td>
-                        <span class="@GetStatusBadgeClass(order.Status)">
-                            @order.Status
-                        </span>
-                    </td>
-                    <td>
-                        @if (order.Status == OrderStatus.Preparing.ToString())
-                        {
-                            <button class="btn btn-success btn-sm me-2"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Ready)">
-                                Ready
-                            </button>
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-warning">@errorMessage</div>
+    }
 
-                            <button class="btn btn-danger btn-sm"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
-                                Cancel
-                            </button>
-                        }
-                        else if (order.Status == OrderStatus.Ready.ToString())
-                        {
-
-                            <button class="btn btn-danger btn-sm"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
-                                Cancel
-                            </button>
-                        }
-                        else if (order.Status == OrderStatus.Cancelled.ToString())
-                        {
-                            <span class="text-muted">Cancelled order cannot be changed</span>
-                        }
-                        else
-                        {
-                            <span class="text-muted">No actions available</span>
-                        }
-                    </td>
+    @if (isLoading)
+    {
+        <p>Loading orders...</p>
+    }
+    else if (!orders.Any())
+    {
+        <div class="alert alert-info">There are no orders.</div>
+    }
+    else
+    {
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Meal</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var order in orders)
+                {
+                    <tr>
+                        <td><strong>#@order.Id</strong></td>
+                        <td>@order.MealName</td>
+                        <td><span class="badge bg-info">@order.Status</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm" @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Ready)">Ready</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
+    private bool isCookLoggedIn = false;
+    private bool isLoading = true;
+    private List<OrderDto> orders = new();
     private string? errorMessage;
     private string? successMessage;
-    private bool isLoading = true;
     private bool isSubmitting;
+    private bool isAuthorized = false;
 
-    private List<OrderDto> orders = new();
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadOrdersAsync();
+        if (firstRender)
+        {
+            // Zkontrolujeme stav
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true && user.IsInRole("canteen-admin"))
+            {
+                isCookLoggedIn = true;
+                StateHasChanged();
+
+                // Načteme objednávky (a případně nastartujeme SSE)
+                await LoadOrdersAsync();
+            }
+            else
+            {
+                isCookLoggedIn = false;
+                isLoading = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void LoginCook()
+    {
+        // Vyvolá přihlášení a po něm kuchařku vrátí rovnou zpět sem
+        NavigationManager.NavigateTo("/login?returnUrl=kitchen/orders", forceLoad: true);
     }
 
     private async Task LoadOrdersAsync()
@@ -112,27 +110,21 @@ else
         try
         {
             isLoading = true;
-            errorMessage = null;
-            successMessage = null;
-
-            OrderDto[]? result = await CanteenService.GetOrdersAsync();
-
-            orders = result?
-                .OrderBy(order => order.Id)
-                .ToList()
-                ?? new List<OrderDto>();
+            var result = await CanteenService.GetOrdersAsync();
+            orders = result?.OrderBy(order => order.Id).ToList() ?? new List<OrderDto>();
         }
-        catch (HttpRequestException e)
+        catch (Exception e)
         {
-            errorMessage = e.Message;
+            errorMessage = "Chyba při načítání objednávek: " + e.Message;
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 
-    private async Task ChangeOrderStatus(int orderId, OrderStatus newStatus)
+    private async Task ChangeOrderStatus(int orderId, OrderStatus status)
     {
         errorMessage = null;
         successMessage = null;
@@ -140,11 +132,7 @@ else
         try
         {
             isSubmitting = true;
-
-            var request = new OrderStatusRequestDto
-            {
-                Status = newStatus
-            };
+            var request = new OrderStatusRequestDto { Status = status };
 
             await CanteenService.UpdateOrderStatusAsync(orderId, request);
 
@@ -159,16 +147,5 @@ else
         {
             isSubmitting = false;
         }
-    }
-
-    private static string GetStatusBadgeClass(string status)
-    {
-        return status switch
-        {
-            "Preparing" => "badge bg-warning text-dark",
-            "Ready" => "badge bg-success",
-            "Cancelled" => "badge bg-danger",
-            _ => "badge bg-info text-dark"
-        };
     }
 }

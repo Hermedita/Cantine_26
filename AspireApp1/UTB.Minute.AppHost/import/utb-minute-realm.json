@@ -1,0 +1,39 @@
+﻿{
+  "realm": "utb-minute",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin-admin",
+        "description": "Administrátor systému"
+      },
+      {
+        "name": "canteen-admin",
+        "description": "Personál kuchyně"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "utb-minute-canteenclient",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [ "http://localhost:*", "https://localhost:*" ],
+      "webOrigins": [ "*" ],
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "utb-minute-adminclient",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [ "http://localhost:*", "https://localhost:*" ],
+      "webOrigins": [ "*" ],
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "utb-minute-webapi",
+      "enabled": true,
+      "bearerOnly": true
+    }
+  ]
+}

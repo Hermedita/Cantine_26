@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.6.11819.183 stable
+VisualStudioVersion = 18.6.11819.183
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTB.Minute.AppHost", "UTB.Minute.AppHost\UTB.Minute.AppHost.csproj", "{7E1D9755-7529-477C-8AA0-06A17D6F72CE}"
 EndProject

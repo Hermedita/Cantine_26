@@ -60,17 +60,33 @@ else
 
 @code {
     private string? errorMessage;
+    private bool isLoading = true;
     private MenuDto[]? menus;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        try
+        isLoading = false; // Prerender jen zobrazí "Loading..."
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            menus = await CanteenService.GetMenusAsync();
-        }
-        catch (HttpRequestException)
-        {
-            errorMessage = "There has been an error";
+            try
+            {
+                errorMessage = null;
+                menus = await CanteenService.GetMenusAsync(); // Volání tvého API pro menu
+            }
+            catch (HttpRequestException e)
+            {
+                errorMessage = "Načítání menu selhalo: " + e.Message;
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
     }
 

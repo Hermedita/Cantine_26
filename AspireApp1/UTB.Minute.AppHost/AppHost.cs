@@ -5,6 +5,15 @@ var sql = builder
 
 var database = sql.AddDatabase("database");
 
+<<<<<<< Updated upstream
+=======
+var keycloak = builder.AddKeycloak("keycloak", 8080)
+                      .WithContainerName("utb-minute-keycloak")
+                      .WithDataVolume("utb-minute-keycloak-data")
+                      .WithRealmImport("import")
+                      .WithLifetime(ContainerLifetime.Persistent);
+
+>>>>>>> Stashed changes
 
 builder.AddProject<Projects.UTB_Minute_DbManager>("utb-minute-dbmanager")
     .WithReference(database)

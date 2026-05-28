@@ -1,16 +1,18 @@
 ﻿@page "/"
-@rendermode InteractiveServer
-@using Microsoft.AspNetCore.Components.Authorization
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using UTB.Minute.Contracts
+@using Microsoft.AspNetCore.Components.Authorization
 @inject CanteenService CanteenService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Meal Manager</PageTitle>
+<h3>Meal Management</h3>
 
-@if(!string.IsNullOrWhiteSpace(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
+<button class="btn btn-success mb-3" disabled="@(!isAdminLoggedIn)" @onclick="CreateMealWithAuthCheck">
+    + Add New Meal
+</button>
 
+<<<<<<< Updated upstream
 <h3>Meals</h3>
 
 @if(meals is null)
@@ -21,48 +23,58 @@ else
 {
     <table class="table">
         <thead>
+=======
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Meal Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var meal in meals)
+        {
+>>>>>>> Stashed changes
             <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Price</th>
-                <th scope="col">Is Active</th>
+                <td>@meal.Name</td>
+                <td>
+                    <span class="badge @(meal.IsActive ? "bg-success" : "bg-danger")">
+                        @(meal.IsActive ? "Active" : "Inactive")
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm me-2" disabled="@(!isAdminLoggedIn)" @onclick="() => EditMealWithAuthCheck(meal.Id)">
+                        Edit
+                    </button>
+
+                    <button class="btn @(meal.IsActive ? "btn-warning" : "btn-outline-success") btn-sm"
+                            disabled="@(!isAdminLoggedIn)"
+                            @onclick="() => ToggleMealActiveWithAuthCheck(meal)">
+                        @(meal.IsActive ? "Disable" : "Enable")
+                    </button>
+                </td>
             </tr>
-        </thead>
-        <tbody>
+        }
+    </tbody>
+</table>
 
-            @foreach(MealDto meal in meals)
-            {
-                <tr>
-                    <th scope="row">@meal.Id</th>
-                    <td>@meal.Name</td>
-                    <td>@meal.Description</td>
-                    <td>@meal.Price</td>
-                    <td>@meal.IsActive</td>
-                        <td>
-                            <button type="button"
-                                    class="btn @(meal.IsActive ? "btn-warning" : "btn-success")"
-                                    @onclick="() => ToggleMealActiveAsync(meal)">
-                                @(meal.IsActive ? "Deactivate" : "Activate")
-                            </button>
-                        </td>
-                    <td>
-                        <a href="/meals/update/@meal.Id" class="btn btn-primary">Edit Meal</a>
-                    </td>
-                </tr>
-            }
-
-        </tbody>
-
-    </table>
+@if (!isAdminLoggedIn)
+{
+    <div class="alert alert-light border text-center mt-4 shadow-sm">
+        <span class="text-muted me-3">Pro provádění změn, editaci a správu jídel se musíte přihlásit.</span>
+        <button class="btn btn-sm btn-outline-primary" @onclick="RedirectToKeycloak">
+            Přihlásit se jako Administrátor
+        </button>
+    </div>
 }
-<br />
-<a class="btn btn-primary" href="/meals/create">Create New Meal</a>
 
 @code {
+    private List<MealDto> meals = new();
+    private bool isAdminLoggedIn = false;
     private string? errorMessage;
-    private MealDto[]? meals;
 
+<<<<<<< Updated upstream
     protected override async Task OnInitializedAsync()
     {
         try
@@ -71,31 +83,81 @@ else
         }
         catch(HttpRequestException){
             errorMessage = "There has been an error";
+=======
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 1. Načteme jídla veřejně (vždy)
+            var result = await CanteenService.GetMealsAsync();
+            meals = result?.ToList() ?? new();
+
+            // 2. Ověříme, zda je v prohlížeči přihlášený uživatel s rolí admin-admin
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true && user.IsInRole("admin-admin"))
+            {
+                isAdminLoggedIn = true;
+            }
+
+            StateHasChanged();
         }
     }
 
-    protected async Task ToggleMealActiveAsync(MealDto meal)
+    private void RedirectToKeycloak()
     {
-        try
+        // Přesměruje uživatele na tvůj přihlašovací endpoint z Keycloaku
+        NavigationManager.NavigateTo("/login?returnUrl=/meals", forceLoad: true);
+    }
+
+    // Pomocná metoda pro kontrolu, zda je uživatel Admin
+    private async Task<bool> IsAdminAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        return authState.User.Identity?.IsAuthenticated == true && authState.User.IsInRole("admin-admin");
+    }
+
+    private async Task CreateMealWithAuthCheck()
+    {
+        if (await IsAdminAsync())
         {
-            if (meal.IsActive)
-            {
-                MealStateRequestDto state = new(){
-                  IsActive = false
-                };
-                await CanteenService.ChangeMealStateAsync(state,meal.Id);
-            }
-            else
-            {
-                MealStateRequestDto state = new(){
-                  IsActive = true  
-                };
-                await CanteenService.ChangeMealStateAsync(state,meal.Id);
-            }
-            meal.IsActive = !meal.IsActive;
+            // Tady máš svou logiku pro otevření modálního okna / formuláře
         }
-        catch (HttpRequestException e){
-            errorMessage = e.ToString();
+        else
+        {
+            NavigationManager.NavigateTo("/login?returnUrl=/meals", forceLoad: true);
+>>>>>>> Stashed changes
+        }
+    }
+
+    private async Task EditMealWithAuthCheck(int id)
+    {
+        if (await IsAdminAsync())
+        {
+            // Tady máš svou logiku pro editaci
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login?returnUrl=/meals", forceLoad: true);
+        }
+    }
+
+    private async Task ToggleMealActiveWithAuthCheck(MealDto meal)
+    {
+        if (await IsAdminAsync())
+        {
+            try
+            {
+                MealStateRequestDto state = new() { IsActive = !meal.IsActive };
+                await CanteenService.ChangeMealStateAsync(state, meal.Id);
+                meal.IsActive = !meal.IsActive;
+            }
+            catch (Exception e) { errorMessage = e.Message; }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login?returnUrl=/meals", forceLoad: true);
         }
     }
 }

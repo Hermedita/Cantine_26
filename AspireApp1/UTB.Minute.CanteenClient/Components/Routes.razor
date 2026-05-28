@@ -1,6 +1,17 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <p>Nemáte oprávnění nebo nejste přihlášeni.</p>
+                <p><a href="/login" forceLoad="true">Přihlásit se</a></p>
+            </NotAuthorized>
+        </AuthorizeRouteView>
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
+            <p role="alert">Page not found.</p>
+        </LayoutView>
+    </NotFound>
 </Router>
