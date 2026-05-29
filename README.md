@@ -1,7 +1,7 @@
 # 🍴 Objednávací systém v menze (UTB Minute)
 
 #### Semestrální projekt do předmětu **Aplikační frameworky**.
-##### Půlsemestrální odevzdání
+##### Semestrální odevzdání
 
 Cílem projektu je návrh a implementace objednávacího systému pro menzu s využitím nástrojů a frameworků .NET Aspire, Minimal WebAPI, Entity Framework Core a Blazor.
 #####
@@ -13,8 +13,8 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 | :-------------------------- | :-------------------------- | :---------: |
 | **Dorien Herman** - vedoucí | Database & DbContext        |      1      |
 | **Jakub Prusenovský**       | WebAPI & WebAPI testy & DTO |      1      |
-| **Iva Trochtová**           | Frontend & Klienti          |      (1)    |
-| **Tomáš Přikryl**           | Keycloak & Zabezpečení      |      (1)    |
+| **Iva Trochtová**           | Frontend & Klienti          |      1      |
+| **Tomáš Přikryl**           | Keycloak & SSE              |      1      |
 
 ---
 
