@@ -6,6 +6,7 @@ var sql = builder
 var database = sql.AddDatabase("database");
 
 var keycloak = builder.AddKeycloak("keycloak", 8080)
+                      .WithRealmImport("import")
                       .WithContainerName("utb-minute-keycloak")
                       .WithDataVolume("utb-minute-keycloak-data")
                       .WithLifetime(ContainerLifetime.Persistent);
