@@ -24,4 +24,8 @@
       <ProjectReference Include="..\UTB.Minute.CanteenClient\UTB.Minute.CanteenClient.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="import\" />
+    </ItemGroup>
+
 </Project>
