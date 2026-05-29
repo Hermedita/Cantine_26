@@ -2,8 +2,25 @@
 @using UTB.Minute.Contracts
 @rendermode InteractiveServer
 @inject CanteenService CanteenService
+@using Microsoft.AspNetCore.Components.Authorization
 
 <h3>Kitchen Orders</h3>
+@* Authentication debug removed — production behavior only *@
+
+<AuthorizeView Roles="canteen-admin">
+    <Authorized>
+        <p>Welcome back @context.User.Identity?.Name !</p>
+
+        <form action="logout" method="post">
+            <AntiforgeryToken />
+            <button type="submit" class="nav-link btn btn-link">Logout</button>
+        </form>
+
+    </Authorized>
+    <NotAuthorized>
+        <p><a href="/login?returnUrl=/kitchen/orders">Log in</a> please.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
 {
@@ -56,37 +73,54 @@ else
                         </span>
                     </td>
                     <td>
-                        @if (order.Status == OrderStatus.Preparing.ToString())
-                        {
-                            <button class="btn btn-success btn-sm me-2"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Ready)">
-                                Ready
-                            </button>
+                        <AuthorizeView Roles="canteen-admin">
+                            <Authorized>
+                                @if (order.Status == OrderStatus.Preparing.ToString())
+                                {
+                                    <button class="btn btn-success btn-sm me-2"
+                                            disabled="@isSubmitting"
+                                            @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Ready)">
+                                        Ready
+                                    </button>
 
-                            <button class="btn btn-danger btn-sm"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
-                                Cancel
-                            </button>
-                        }
-                        else if (order.Status == OrderStatus.Ready.ToString())
-                        {
+                                    <button class="btn btn-danger btn-sm"
+                                            disabled="@isSubmitting"
+                                            @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
+                                        Cancel
+                                    </button>
+                                }
+                                else if (order.Status == OrderStatus.Ready.ToString())
+                                {
+                                    <button class="btn btn-danger btn-sm me-2"
+                                            disabled="@isSubmitting"
+                                            @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
+                                        Cancel
+                                    </button>
 
-                            <button class="btn btn-danger btn-sm"
-                                    disabled="@isSubmitting"
-                                    @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Cancelled)">
-                                Cancel
-                            </button>
-                        }
-                        else if (order.Status == OrderStatus.Cancelled.ToString())
-                        {
-                            <span class="text-muted">Cancelled order cannot be changed</span>
-                        }
-                        else
-                        {
-                            <span class="text-muted">No actions available</span>
-                        }
+                                    <button class="btn btn-secondary btn-sm"
+                                            disabled="@isSubmitting"
+                                            @onclick="() => ChangeOrderStatus(order.Id, OrderStatus.Finished)">
+                                        Finished
+                                    </button>
+                                }
+                                else if (order.Status == OrderStatus.Cancelled.ToString())
+                                {
+                                    <span class="text-muted">Cancelled order cannot be changed</span>
+                                }
+                                else if (order.Status == OrderStatus.Finished.ToString())
+                                {
+                                    <span class="text-muted">Finished order cannot be changed</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No actions available</span>
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                                <!-- no action buttons for unauthorized users -->
+                                <span class="text-muted">No actions available</span>
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </td>
                 </tr>
             }
@@ -132,6 +166,8 @@ else
         }
     }
 
+
+
     private async Task ChangeOrderStatus(int orderId, OrderStatus newStatus)
     {
         errorMessage = null;
@@ -168,6 +204,7 @@ else
             "Preparing" => "badge bg-warning text-dark",
             "Ready" => "badge bg-success",
             "Cancelled" => "badge bg-danger",
+            "Finished" => "badge bg-secondary",
             _ => "badge bg-info text-dark"
         };
     }

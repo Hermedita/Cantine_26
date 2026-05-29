@@ -55,14 +55,28 @@ else
                     <td>@meal.Price</td>
                     <td>@meal.IsActive</td>
                         <td>
-                            <button type="button"
-                                    class="btn @(meal.IsActive ? "btn-warning" : "btn-success")"
-                                    @onclick="() => ToggleMealActiveAsync(meal)">
-                                @(meal.IsActive ? "Deactivate" : "Activate")
-                            </button>
+                            <AuthorizeView Roles="admin-admin">
+                                <Authorized>
+                                    <button type="button"
+                                            class="btn @(meal.IsActive ? "btn-warning" : "btn-success")"
+                                            @onclick="() => ToggleMealActiveAsync(meal)">
+                                        @(meal.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <!-- no toggle for unauthorized users -->
+                                </NotAuthorized>
+                            </AuthorizeView>
                         </td>
                     <td>
+                        <AuthorizeView Roles="admin-admin">
+                            <Authorized>
                         <a href="/meals/update/@meal.Id" class="btn btn-primary">Edit Meal</a>
+                            </Authorized>
+                            <NotAuthorized>
+                                <!-- no edit for unauthorized -->
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </td>
                 </tr>
             }
@@ -72,35 +86,30 @@ else
     </table>
 }
 <br />
+<AuthorizeView Roles="admin-admin">
+    <Authorized>
 <a class="btn btn-primary" href="/meals/create">Create New Meal</a>
+    </Authorized>
+    <NotAuthorized>
+        <!-- no create for unauthorized -->
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private string? errorMessage;
     private MealDto[]? meals;
 
-    [Inject] public AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
-
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        try
         {
-            try
-            {
-                // Data načteme, jen pokud je uživatel přihlášený
-                meals = await CanteenService.GetMealsAsync();
-            }
-            catch (HttpRequestException)
-            {
-                errorMessage = "There has been an error loading meals.";
-            }
+            // Load meals for everyone so anonymous users can view the list
+            meals = await CanteenService.GetMealsAsync();
         }
-        else
+        catch (HttpRequestException ex)
         {
-            // Pokud není přihlášený, nastavíme prázdné pole (nebo null),
-            // aby se nezobrazoval nápis "Loading...", ale uživatel viděl jen výzvu k přihlášení
+            // Show detailed message to help diagnose connectivity/auth issues
+            errorMessage = $"There has been an error loading meals: {ex.Message}";
             meals = Array.Empty<MealDto>();
         }
     }

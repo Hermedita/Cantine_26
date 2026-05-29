@@ -7,8 +7,20 @@ namespace UTB.Minute.AdminClient
     {
         public async Task<MealDto[]?> GetMealsAsync()
         {
-            MealDto[]? meals = await httpClient.GetFromJsonAsync<MealDto[]>("/meals");
-            return meals;
+            try
+            {
+                MealDto[]? meals = await httpClient.GetFromJsonAsync<MealDto[]>("/meals");
+                return meals;
+            }
+            catch (TaskCanceledException ex) when (!System.Threading.CancellationToken.None.IsCancellationRequested)
+            {
+                // likely a timeout
+                throw new HttpRequestException($"Request to backend timed out contacting {httpClient.BaseAddress}/meals", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpRequestException($"Failed to get meals from backend at {httpClient.BaseAddress}/meals: {ex.Message}", ex);
+            }
         }
 
         public async Task CreateMealAsync(MealRequestDto meal)

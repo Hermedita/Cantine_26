@@ -33,6 +33,7 @@ public class CanteenService(HttpClient httpClient)
         var response = await httpClient.PutAsJsonAsync($"/orders/{orderId}/status", request);
         await EnsureSuccessOrThrowWarningAsync(response, "Order status could not be changed.");
     }
+    // WebApi supports Finished; no client changes required.
 
     private static async Task EnsureSuccessOrThrowWarningAsync(
         HttpResponseMessage response,

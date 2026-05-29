@@ -1,5 +1,6 @@
 @page "/menus"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
 @using UTB.Minute.Contracts
 @inject CanteenService CanteenService
 
@@ -11,6 +12,21 @@
 }
 
 <h3>Menu</h3>
+
+<AuthorizeView Roles="admin-admin">
+    <Authorized>
+        <p>Welcome back @context.User.Identity?.Name !</p>
+
+        <form action="logout" method="post">
+            <AntiforgeryToken />
+            <button type="submit" class="nav-link btn btn-link">Logout</button>
+        </form>
+
+    </Authorized>
+    <NotAuthorized>
+        <p><a href="/login?returnUrl=/menus">Log in</a> please.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @if (menus is null)
 {
@@ -41,12 +57,26 @@ else
                     <td>@menu.Date</td>
                     <td>@menu.Portions</td>
                     <td>
-                        <a href="/menus/update/@menu.Id" class="btn btn-primary">Edit</a>
+                        <AuthorizeView Roles="admin-admin">
+                            <Authorized>
+                                <a href="/menus/update/@menu.Id" class="btn btn-primary">Edit</a>
+                            </Authorized>
+                            <NotAuthorized>
+                                <!-- no edit for unauthorized -->
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </td>
                     <td>
-                        <button class="btn btn-danger" @onclick="() => DeleteMenu(menu.Id)">
-                            Delete
-                        </button>
+                        <AuthorizeView Roles="admin-admin">
+                            <Authorized>
+                                <button class="btn btn-danger" @onclick="() => DeleteMenu(menu.Id)">
+                                    Delete
+                                </button>
+                            </Authorized>
+                            <NotAuthorized>
+                                <!-- no delete for unauthorized -->
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </td>
                 </tr>
             }
@@ -56,7 +86,14 @@ else
 
 <br />
 
-<a class="btn btn-primary" href="/menus/create">Create New</a>
+<AuthorizeView Roles="admin-admin">
+    <Authorized>
+        <a class="btn btn-primary" href="/menus/create">Create New</a>
+    </Authorized>
+    <NotAuthorized>
+        <!-- No create button for anonymous users -->
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private string? errorMessage;

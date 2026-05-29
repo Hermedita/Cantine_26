@@ -28,7 +28,8 @@ app.MapDefaultEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/meals", WebAPI.PrintMeals).RequireAuthorization(pb => pb.RequireRole("admin-admin"));
+// Allow anonymous access to list meals so clients can display menus to unauthenticated users.
+app.MapGet("/meals", WebAPI.PrintMeals);
 app.MapGet("/meals/{id}", WebAPI.GetMeal);
 app.MapPost("/meals", WebAPI.CreateNewMeal);
 app.MapPut("/meals/{id}", WebAPI.UpdateMeal);
