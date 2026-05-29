@@ -196,6 +196,81 @@ Content-Type: application/json
 
 ---
 
+# Projekty a integrace
+- [x] `AdminClient` a `CanteenClient` napojené na WebAPI
+```csharp
+public class CanteenService(HttpClient httpClient)
+{
+    public async Task<MenuDto[]?> GetMenusAsync()
+    {
+        return await httpClient.GetFromJsonAsync<MenuDto[]>("/menus");
+    }
+
+    public async Task<OrderDto[]?> GetOrdersAsync()
+    {
+        return await httpClient.GetFromJsonAsync<OrderDto[]>("/orders");
+    }...
+```
+- [x] Backend plně funkční a použitý oběma klienty
+---
+
+### Student – funkcionalita klienta
+- [ ] Zobrazení menu pro aktuální den (2 body)
+- [ ] Zobrazení seznamu objednávek (2 bod)
+- [ ] Objednání jídla + snížení počtu porcí (2 body)
+- [ ] Vyprodaná jídla vizuálně odlišena (2 body)
+- [ ] Řešena souběžnost při objednávání poslední porce na úrovni databáze nebo transakce (např. optimistic concurrency, RowVersion) (2 body)
+
+---
+
+### Kuchařka – funkcionalita klienta (0–6 bodů)
+- [ ] Zobrazení nedokončených objednávek (2 body)
+- [ ] Změna stavu objednávky (hotová / zrušená / dokončená) (2 body)
+- [ ] Neplatné přechody objednávek jsou blokovány (např. nelze přejít ze 'Zrušeno' na 'Hotovo') (2 body)
+
+---
+
+### Vedení menzy – funkcionalita klienta
+
+#### Jídla (0–3 body)
+- [x] Vytváření jídel (1 bod)
+```csharp
+  public async Task CreateMealAsync(MealRequestDto meal)
+  {
+      var response = await httpClient.PostAsJsonAsync("/meals", meal);
+      response.EnsureSuccessStatusCode();
+
+      await AutoNotifyChangesAsync();
+  }
+```
+- [ ] Úprava jídel (1 bod)
+- [ ] Deaktivace jídla (1 bod)
+
+#### Menu (0–2 body)
+- [ ] Vytváření položek menu (1 bod)
+- [ ] Úprava položek menu (1 bod)
+
+---
+
+### SSE notifikace (0–5 bodů)
+- [ ] Funkční SSE endpoint (2 body)
+- [ ] Notifikace pro studenta i kuchařku (2 body)
+- [ ] Automatická aktualizace UI (1 bod)
+
+---
+
+### Autentizace a autorizace (0–6 bodů)
+- [ ] Keycloak spuštěn přes Aspire (2 body)
+- [ ] Backend zabezpečen podle rolí (2 body)
+- [ ] UI reaguje na roli uživatele (2 body)
+
+---
+
+### Dokumentace (0–2 body)
+- [ ] Aktualizovaná dokumentace k finálnímu řešení (2 body)
+
+---
+
 ## 📝 Poznámky k odevzdání
 * **Stav:** Projekt je spustitelný, ale nemá UI ani zabezpečení.
 * **Testování:** Unit testy v `UTB.Minute.WebApi.Tests` pokrývají scénář od vytvoření jídla až po jeho výdej.
