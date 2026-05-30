@@ -72,7 +72,7 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 
 ### Přehled Db objektů (UTB.Minute.Db)
 | Objekt  | Popis                                                                     |
-|---------|---------------------------------------------------------------------------|
+| ------- | ------------------------------------------------------------------------- |
 | `Meal`  | Jídlo (`MealId`, `Name`, `Description`, `Price`,  `IsActive`)             |
 | `Menu`  | Menu s jídly (`MenuId`, `MealId`, `MenuDate`, `Portions`, ref. na `Meal`) |
 | `Order` | Objednávka (`OrderId`, `MenuId`, `Status`, ref. na `Menu`)                |
@@ -80,7 +80,7 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 
 ### Přehled DTO Entit (UTB.Minute.Contracts)
 | Entita                  | Popis                                                        |
-|-------------------------|--------------------------------------------------------------|
+| ----------------------- | ------------------------------------------------------------ |
 | `MealDto`               | Jídlo (`Id`, `Name`, `Price`, `Description`, `IsActive`)     |
 | `MealRequestDto`        | Jídlo (`Name`, `Price`, `Description`)                       |
 | `MealStateRequestDto`   | Jídlo (`IsActive`)                                           |
@@ -111,13 +111,13 @@ public enum OrderStatus
 
 #### Seznam API endpointů (Meals)
 
-|   |                                      |                                       |   |
-|---|--------------------------------------|---------------------------------------|---|
-|   |`GET {{HostAddress}}/meals`           | Seznam všech jídel                    |   |
-|   |`POST {{HostAddress}}/meals`          | Vytvoření nového jídla                |   |
-|   |`PUT {{HostAddress}}/meals/1`         | Změna jídla                           |   |
-|   |`PATCH  {{HostAddress}}/meals/1/state`| Změní stav jídla, valid -> true/false |   |
-|   |                                      |                                       |   |
+|     |                                        |                                       |     |
+| --- | -------------------------------------- | ------------------------------------- | --- |
+|     | `GET {{HostAddress}}/meals`            | Seznam všech jídel                    |     |
+|     | `POST {{HostAddress}}/meals`           | Vytvoření nového jídla                |     |
+|     | `PUT {{HostAddress}}/meals/1`          | Změna jídla                           |     |
+|     | `PATCH  {{HostAddress}}/meals/1/state` | Změní stav jídla, valid -> true/false |     |
+|     |                                        |                                       |     |
 
 #### Příklad API endpointu
 ##### např. `POST {{HostAddress}}/meals`
@@ -139,13 +139,13 @@ Content-Type: application/json
 
 #### Seznam API endpointů (Menus)
 
-|  |                                |                       |   |
-|--|--------------------------------|-----------------------|---|
-|  |`GET {{HostAddress}}/menus`     | Seznam všech meníček  |   |
-|  |`POST {{HostAddress}}/menus`    | Vytvoření nového menu |   |
-|  |`PUT {{HostAddress}}/menus/1`   | Změna menu            |   |
-|  |`DELETE {{HostAddress}}/menus/1`| Vymazat menu          |   |
-|  |                                |                       |   |
+|     |                                  |                       |     |
+| --- | -------------------------------- | --------------------- | --- |
+|     | `GET {{HostAddress}}/menus`      | Seznam všech meníček  |     |
+|     | `POST {{HostAddress}}/menus`     | Vytvoření nového menu |     |
+|     | `PUT {{HostAddress}}/menus/1`    | Změna menu            |     |
+|     | `DELETE {{HostAddress}}/menus/1` | Vymazat menu          |     |
+|     |                                  |                       |     |
 
 #### Příklad API endpointu
 ##### např. `PUT {{HostAddress}}/menus/1`
@@ -168,11 +168,11 @@ Content-Type: application/json
 
 #### Seznam API endpointů (Orders)
 
-|  |                                |                         |  |
-|--|--------------------------------|-------------------------|--|
-|  |`GET {{HostAddress}}/orders`  | Seznam všech objednávek   |  |
-|  |`POST {{HostAddress}}/orders` | Vytvoření nové objednávky |  |
-|  |                                |                         |  |
+|     |                               |                           |     |
+| --- | ----------------------------- | ------------------------- | --- |
+|     | `GET {{HostAddress}}/orders`  | Seznam všech objednávek   |     |
+|     | `POST {{HostAddress}}/orders` | Vytvoření nové objednávky |     |
+|     |                               |                           |     |
 
 #### Příklad API endpointu
 ##### např. `POST {{HostAddress}}/orders`
