@@ -13,12 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 IdentityModelEventSource.ShowPII = true;
 
-/*
-builder.Services.AddHttpClient("api", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:5156");
-});*/
-
 builder.AddServiceDefaults();
 
 builder.Services.AddRazorComponents()
@@ -43,14 +37,13 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("openid"); // id_token
         options.Scope.Add("offline_access"); // refresh_token
         options.SaveTokens = true;
-        options.RequireHttpsMetadata = false; // jen dev
+        options.RequireHttpsMetadata = false; // only dev
         options.TokenValidationParameters.NameClaimType = "preferred_username";
         options.Events = new OpenIdConnectEvents
         {
             OnRedirectToIdentityProvider = context =>
             {
-                // Vynutíme, aby redirect_uri posílaná do Keycloaku byla VŽDY https,
-                // protože tvůj prohlížeč běží na https://localhost:7076
+                // Force redirect_uri sent to Keycloak to ALWAYS be https, -> https://localhost:7076
                 if (context.ProtocolMessage.RedirectUri.StartsWith("http://"))
                 {
                     context.ProtocolMessage.RedirectUri = context.ProtocolMessage.RedirectUri.Replace("http://", "https://");

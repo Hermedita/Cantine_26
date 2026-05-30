@@ -1,7 +1,7 @@
 # 🍴 Objednávací systém v menze (UTB Minute)
 
 #### Semestrální projekt do předmětu **Aplikační frameworky**.
-##### Semestrální odevzdání
+##### Semestrální/Finální odevzdání
 
 Cílem projektu je návrh a implementace objednávacího systému pro menzu s využitím nástrojů a frameworků .NET Aspire, Minimal WebAPI, Entity Framework Core a Blazor.
 #####
@@ -35,9 +35,11 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 - **ASP.NET Core Minimal API** — HTTP endpointy
 - **.NET Aspire** — orchestrace služeb a service discovery
 - **Entity Framework Core** — přístup k databázi
-- **SQL Server** — relační databáze (běží v kontejneru)
-- **Keycloak** — připraveno pro autentizaci (zatím nenasazeno)
+- **SQLite Server** — relační databáze (běží v kontejneru)
+- **Keycloak** — pro autentizaci/zabezpečení
 - **xUnit** — unit a integrační testy
+- **Server-Sent Events (SSE)** — serverem iniciované notifikace
+- **Service Discovery** — nemá pevně zadané lokální adresy
 
 
 ---
@@ -45,11 +47,13 @@ Objednávací systém pro menzu umožňuje objednávání minutek (jídel připr
 ## Struktura řešení
 
 - `AspireApp1.ServiceDefaults`: Sdílená konfigurace služeb (health checks, telemetrie)
-- `UTB.Minute.AppHost`: Aspire orchestrace - definuje kontejnery a jejich propojení
+- `UTB.Minute.AdminClient`: Blazor Server aplikace pro vedení menzy. Volá WebAPI pomocí protokolu HTTP.
+- `UTB.Minute.AppHost`: Aspire orchestrace - definuje kontejnery a jejich propojení + SSE
+- `UTB.Minute.CanteenClient`: Blazor Server aplikace pro uživatele menzy. Volá WebAPI pomocí protokolu HTTP.
+- `UTB.Minute.Contracts`: Sdílené DTO (Data Transfer Objects) pro WebApi a klienty
 - `UTB.Minute.Db`: Databáze a DbContext
 - `UTB.Minute.DbManager`: Obsahuje reset Databáze
-- `UTB.Minute.Contracts`: Sdílené DTO (Data Transfer Objects) pro WebApi
-- `UTB.Minute.WebApi`: Správa objednávek, jídel a meníček. Obsahuje endpointy pro **Http Commandy** 
+- `UTB.Minute.WebApi`: Správa objednávek, jídel a meníček. Obsahuje endpointy pro **Http Commandy** a SSE
 - `UTB.Minute.WebApi.Tests`: Testování CRUD commandů v databázi a propojení s WebApi
 
 #####
@@ -185,18 +189,49 @@ Content-Type: application/json
 
 ## Aspire integrace
 - [x] Databáze vytvořena a konfigurována přes Aspire
+```csharp
+<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.1.1" />
+```
 - [x] Http Command pro reset databáze
+```csharp
+app.MapPost("/reset-db", async (MealDbContext context) =>  //changed from DbContext to MealDbContext
+{
+    await context.Database.EnsureDeletedAsync();
+    await context.Database.EnsureCreatedAsync();
+    await context.SaveChangesAsync();
+});
+```
 - [x] Seed testovacích dat funguje
+```csharp
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<MealDbContext>();
+
+    await context.Database.EnsureCreatedAsync();
+
+    if (!context.Meals.Any())
+    {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly tomorrow = today.AddDays(1);
+
+        var rizek = new Meal { Name = "Kuřecí řízek", Price = 135, IsActive = true, Description = "Smažený řízek" };
+        var smazak = new Meal { Name = "Smažák", Price = 120, IsActive = true, Description = "Sýr" };
+
+        var rizekMenu = new Menu { Meal = rizek, MenuDate = today, Portions = 50 };
+        var smazakMenu = new Menu { Meal = smazak, MenuDate = tomorrow, Portions = 0 };
+
+        context.Meals.AddRange(rizek, smazak);
+        context.MenuItems.AddRange(rizekMenu, smazakMenu);
+
+        await context.SaveChangesAsync();
+    }
+}
+```
 - [x] Service Discovery bez pevných adres
 
 ---
 
-### Testy a dokumentace
-- [x] Stručná dokumentace projektu (README.md)
-
----
-
-# Projekty a integrace
+## Projekty a integrace
 - [x] `AdminClient` a `CanteenClient` napojené na WebAPI
 ```csharp
 public class CanteenService(HttpClient httpClient)
@@ -205,73 +240,85 @@ public class CanteenService(HttpClient httpClient)
     {
         return await httpClient.GetFromJsonAsync<MenuDto[]>("/menus");
     }
-
-    public async Task<OrderDto[]?> GetOrdersAsync()
-    {
-        return await httpClient.GetFromJsonAsync<OrderDto[]>("/orders");
-    }...
+...
 ```
 - [x] Backend plně funkční a použitý oběma klienty
+```csharp
+using UTB.Minute.Contracts;
+```
 ---
 
-### Student – funkcionalita klienta
-- [ ] Zobrazení menu pro aktuální den (2 body)
-- [ ] Zobrazení seznamu objednávek (2 bod)
-- [ ] Objednání jídla + snížení počtu porcí (2 body)
-- [ ] Vyprodaná jídla vizuálně odlišena (2 body)
-- [ ] Řešena souběžnost při objednávání poslední porce na úrovni databáze nebo transakce (např. optimistic concurrency, RowVersion) (2 body)
+## Funkcionalita klienta
+*Přihlašovací údaje jsou v "UTB.Minute.AppHost/import/utb-minute-users-0.json"*
+
+### Student (Karel)
+- [x] Zobrazení menu pro aktuální den
+- [x] Zobrazení seznamu objednávek
+- [x] Objednání jídla + snížení počtu porcí
+- [x] Vyprodaná jídla vizuálně odlišena (šedě + readonly)
 
 ---
 
-### Kuchařka – funkcionalita klienta (0–6 bodů)
-- [ ] Zobrazení nedokončených objednávek (2 body)
-- [ ] Změna stavu objednávky (hotová / zrušená / dokončená) (2 body)
-- [ ] Neplatné přechody objednávek jsou blokovány (např. nelze přejít ze 'Zrušeno' na 'Hotovo') (2 body)
+### Kuchařka (Kucharka)
+- [x] Zobrazení nedokončených objednávek
+- [x] Změna stavu objednávky (hotová / zrušená / dokončená)
+- [x] Neplatné přechody objednávek jsou blokovány (např. nelze přejít ze 'Zrušeno' na 'Hotovo')
 
 ---
 
-### Vedení menzy – funkcionalita klienta
-
-#### Jídla (0–3 body)
-- [x] Vytváření jídel (1 bod)
+### Jídla
+- [x] Vytváření jídel
 ```csharp
   public async Task CreateMealAsync(MealRequestDto meal)
-  {
-      var response = await httpClient.PostAsJsonAsync("/meals", meal);
-      response.EnsureSuccessStatusCode();
-
-      await AutoNotifyChangesAsync();
-  }
 ```
-- [ ] Úprava jídel (1 bod)
-- [ ] Deaktivace jídla (1 bod)
+- [x] Úprava jídel
+```csharp
+public async Task UpdateMealAsync(MealRequestDto meal, int id)
+```
+- [x] Deaktivace jídla
+```csharp
+public async Task ChangeMealStateAsync(MealStateRequestDto mealStateRequest, int id)
+```
 
-#### Menu (0–2 body)
-- [ ] Vytváření položek menu (1 bod)
-- [ ] Úprava položek menu (1 bod)
-
----
-
-### SSE notifikace (0–5 bodů)
-- [ ] Funkční SSE endpoint (2 body)
-- [ ] Notifikace pro studenta i kuchařku (2 body)
-- [ ] Automatická aktualizace UI (1 bod)
-
----
-
-### Autentizace a autorizace (0–6 bodů)
-- [ ] Keycloak spuštěn přes Aspire (2 body)
-- [ ] Backend zabezpečen podle rolí (2 body)
-- [ ] UI reaguje na roli uživatele (2 body)
+### Menu
+- [x] Vytváření položek menu
+```csharp
+public async Task CreateMenuAsync(MenuRequestDto menu)
+```
+- [x] Úprava položek menu
+```csharp
+public async Task UpdateMenuAsync(MenuRequestDto menu, int id)
+```
 
 ---
 
-### Dokumentace (0–2 body)
-- [ ] Aktualizovaná dokumentace k finálnímu řešení (2 body)
+### SSE notifikace
+- [x] Funkční SSE endpoint
+- [x] Notifikace pro studenta i kuchařku
+```csharp
+public async Task BroadcastOrderUpdateAsync(OrderUpdateMessage message)
+```
+- [x] Automatická aktualizace UI
+
+---
+
+### Autentizace a autorizace
+- [x] Keycloak spuštěn přes Aspire
+```csharp
+<PackageReference Include="Aspire.Hosting.Keycloak" Version="13.3.5-preview.1.26270.6" />
+```
+- [x] Backend zabezpečen podle rolí
+- [x] UI reaguje na roli uživatele
+
+---
+
+### Testy a dokumentace
+- [x] Stručná dokumentace projektu (README.md)
+- [x] Aktualizovaná dokumentace k finálnímu řešení
 
 ---
 
 ## 📝 Poznámky k odevzdání
-* **Stav:** Projekt je spustitelný, ale nemá UI ani zabezpečení.
+* **Stav:** Projekt je spustitelný, a dokončený.
 * **Testování:** Unit testy v `UTB.Minute.WebApi.Tests` pokrývají scénář od vytvoření jídla až po jeho výdej.
 * **Problémy:** Při tvorbě projektu nenastaly žádné zásadní komplikace.

@@ -106,7 +106,7 @@ namespace UTB.Minute.AdminClient
             }
             catch
             {
-                // Selhání notifikace by nemělo shodit uložení dat v administraci
+                // Failure of notification should not cause data storage in the administration to fail
             }
         }
 

@@ -23,8 +23,7 @@ public class SseNotificationService
             }
             catch
             {
-                // Pokud klient neodpovídá (zavřel prohlížeč), v reálném produkčním kódu by se měl odstranit.
-                // Pro zjednodušení školního projektu to stačí takto, případně streamy čistit.
+                // If the client is not responding (closing the browser)
             }
         }
     }
